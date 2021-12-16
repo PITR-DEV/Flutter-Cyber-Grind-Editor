@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:path/path.dart' as p;
 import 'package:cgef/helpers/parsing_helper.dart';
 import 'package:cgef/state/app_state.dart';
 import 'package:cgef/state/grid_state.dart';
@@ -11,7 +12,7 @@ import 'package:layout/layout.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class EditorScreen extends StatefulWidget {
-  EditorScreen({Key? key}) : super(key: key);
+  const EditorScreen({Key? key}) : super(key: key);
 
   @override
   _EditorScreenState createState() => _EditorScreenState();
@@ -21,18 +22,26 @@ class _EditorScreenState extends State<EditorScreen> {
   Future<void> _export() async {
     var date = DateTime.now();
 
+    var patternsPath = p.join('C:', 'Program Files (x86)', 'Steam', 'steamapps',
+        'common', 'ULTRAKILL', 'CyberGrind', 'Patterns');
+
+    // No need to verify, seems to be automatically handled.
+    // Maybe in the future, pass the game path to cgef while launching.
+
     String? outputPath = await FilePicker.platform.saveFile(
       dialogTitle: 'Export your pattern:',
-      fileName: date.hour.toString() +
-          '_' +
-          date.minute.toString() +
-          ' - ' +
-          date.day.toString() +
-          '_' +
-          date.month.toString() +
-          '_' +
-          date.year.toString() +
-          '.cgp',
+      fileName: p.join(
+          patternsPath,
+          date.hour.toString() +
+              '_' +
+              date.minute.toString() +
+              ' - ' +
+              date.day.toString() +
+              '_' +
+              date.month.toString() +
+              '_' +
+              date.year.toString() +
+              '.cgp'),
       allowedExtensions: ['cgp'],
       type: FileType.custom,
     );

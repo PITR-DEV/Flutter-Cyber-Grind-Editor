@@ -90,7 +90,7 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "dev.pitr" "\0"
-            VALUE "FileDescription", "A new Flutter project." "\0"
+            VALUE "FileDescription", "The Official Cyber Grind Editor, rebuilt in Flutter." "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "cgef" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2021 dev.pitr. All rights reserved." "\0"
