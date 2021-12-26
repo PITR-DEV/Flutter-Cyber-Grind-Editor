@@ -1,3 +1,4 @@
+import 'package:cgef/helpers/platform_helper.dart';
 import 'package:cgef/state/app_state.dart';
 import 'package:cgef/widgets/input/fat_button.dart';
 import 'package:flutter/material.dart';
@@ -28,14 +29,16 @@ class Toolbox extends StatelessWidget {
                 child: const Icon(Icons.create_outlined),
               ),
             ),
-            Tooltip(
-              message: 'Brush',
-              child: FatButton(
-                onPressed: () => model.setTool(Tool.brush),
-                active: model.tool == Tool.brush,
-                child: const Icon(Icons.brush_outlined),
-              ),
-            ),
+            PlatformHelper().isDesktop
+                ? Tooltip(
+                    message: 'Brush',
+                    child: FatButton(
+                      onPressed: () => model.setTool(Tool.brush),
+                      active: model.tool == Tool.brush,
+                      child: const Icon(Icons.brush_outlined),
+                    ),
+                  )
+                : Container(),
             Tooltip(
               message: 'Fill Rect',
               child: FatButton(

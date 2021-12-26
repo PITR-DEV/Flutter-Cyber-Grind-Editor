@@ -48,6 +48,7 @@ class _ArenaGridState extends State<ArenaGrid> {
     // );
 
     return GridView.count(
+      physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: ParsingHelper.arenaSize,
       mainAxisSpacing: 0,
       crossAxisSpacing: 0,

@@ -49,9 +49,11 @@ class _AppRootState extends State<AppRoot> {
       initialRoute: '/home',
       routes: {
         '/home': (context) => const HomeScreen(),
-        '/editor': (context) => QuitConfirmation(MainLayout(
-              content: EditorScreen(),
-            )),
+        '/editor': (context) => const QuitConfirmation(
+              MainLayout(
+                content: EditorScreen(),
+              ),
+            ),
       },
     );
   }
