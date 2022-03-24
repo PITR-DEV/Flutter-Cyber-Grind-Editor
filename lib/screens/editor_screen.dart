@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cgef/helpers/platform_helper.dart';
+import 'package:cgef/widgets/exception_dialog.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path/path.dart' as p;
@@ -25,64 +26,79 @@ class EditorScreen extends StatefulWidget {
 
 class _EditorScreenState extends State<EditorScreen> {
   Future<void> _export() async {
-    var date = DateTime.now();
-    String? outputPath;
-    final fileName = date.hour.toString() +
-        '_' +
-        date.minute.toString() +
-        ' - ' +
-        date.day.toString() +
-        '_' +
-        date.month.toString() +
-        '_' +
-        date.year.toString() +
-        '.cgp';
+    try {
+      var date = DateTime.now();
+      String? outputPath;
+      final fileName = date.hour.toString() +
+          '_' +
+          date.minute.toString() +
+          ' - ' +
+          date.day.toString() +
+          '_' +
+          date.month.toString() +
+          '_' +
+          date.year.toString() +
+          '.cgp';
 
-    if (PlatformHelper().isDesktop) {
-      // No need to verify, seems to be automatically handled.
-      // Maybe in the future, pass the game path to cgef while launching.
-      var patternsPath = p.join('C:', 'Program Files (x86)', 'Steam',
-          'steamapps', 'common', 'ULTRAKILL', 'CyberGrind', 'Patterns');
+      var resEx =
+          // p.join(
+          //     p.join('C:', 'Program Files (x86)', 'Steam', 'steamapps', 'common',
+          //         'ULTRAKILL', 'ULTRAKILL_Data', 'StreamingAssets'),
+          //     'cgef',
+          //     'cgef.exe');
+          Platform.resolvedExecutable;
 
-      print(patternsPath);
-      print(fileName);
-      print(p.join(patternsPath, fileName));
+      var exFile = File(resEx);
+      if (exFile.parent.parent.parent.parent.existsSync()) {
+        var ultrakillDirectory = exFile.parent.parent.parent.parent;
+
+        if (ultrakillDirectory.path.split(Platform.pathSeparator).last ==
+            "ULTRAKILL") {
+          print('ULTRAKILL dir spotted');
+
+          var patternsDir = Directory(
+              p.join(ultrakillDirectory.path, 'Cybergrind', 'Patterns'));
+          if (patternsDir.existsSync()) {
+            outputPath = patternsDir.path;
+          }
+        } else {
+          print('cgef seems to be not in StreamingAssets.');
+          print('attempting to use default path');
+          outputPath = p.join('C:', 'Program Files (x86)', 'Steam', 'steamapps',
+              'common', 'ULTRAKILL', 'Cybergrind', 'Patterns');
+        }
+      }
+
+      print('Setting default filename to ' + (outputPath ?? 'null'));
+
       outputPath = await FilePicker.platform.saveFile(
         dialogTitle: 'Export your pattern:',
-
-        // Was p.join(patternsPath, fileName) before, but it somehow doesn't work anymore.
         fileName: fileName,
+        initialDirectory: outputPath,
         allowedExtensions: ['cgp'],
         type: FileType.custom,
       );
-      print(outputPath);
-    } else {
-      return;
-      // Mobile
-      final dir =
-          Directory((await getExternalStorageDirectory())!.path + '/CGEF/');
-      var status = await Permission.storage.status;
-      if (!status.isGranted) {
-        await Permission.storage.request();
-      }
-      if (!(await dir.exists())) {
-        dir.create();
+
+      print('User selected ' + (outputPath ?? 'null'));
+
+      if (outputPath == null) return;
+
+      if (!outputPath.endsWith('.cgp')) {
+        outputPath += '.cgp';
       }
 
-      outputPath = p.join(dir.path, fileName);
-    }
+      var grid = ScopedModel.of<GridState>(context).grid;
+      var exportableString = ParsingHelper().stringifyPattern(grid);
 
-    if (outputPath == null) return;
+      await File(outputPath).writeAsString(exportableString);
 
-    var grid = ScopedModel.of<GridState>(context).grid;
-    var exportableString = ParsingHelper().stringifyPattern(grid);
-
-    await File(outputPath).writeAsString(exportableString);
-
-    if (!PlatformHelper().isDesktop) {
-      Fluttertoast.showToast(
-          msg: 'Pattern exported to $outputPath',
-          toastLength: Toast.LENGTH_LONG);
+      if (!PlatformHelper().isDesktop) {
+        Fluttertoast.showToast(
+            msg: 'Pattern exported to $outputPath',
+            toastLength: Toast.LENGTH_LONG);
+      }
+    } catch (ex, stack) {
+      spawnExceptionDialog(context, "$ex\n$stack");
     }
   }
 

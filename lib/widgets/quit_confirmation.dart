@@ -10,30 +10,46 @@ class QuitConfirmation extends StatefulWidget {
 }
 
 class _QuitConfirmationState extends State<QuitConfirmation> {
+  Future<bool> _dialog() async {
+    var btnTxtStyle = const TextStyle(color: Colors.white);
+
+    return await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Are you sure you want to quit?'),
+          backgroundColor: Colors.black,
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: Text(
+                'Yes',
+                style: btnTxtStyle,
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: Text(
+                'No',
+                style: btnTxtStyle,
+              ),
+            )
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
     FlutterWindowClose.setWindowShouldCloseHandler(
       () async {
-        return await showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                      title: const Text('Are you sure you want to quit?'),
-                      actions: [
-                        TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop(true);
-                            },
-                            child: const Text('Yes')),
-                        TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop(false);
-                            },
-                            child: const Text('No'))
-                      ]);
-                }) ??
-            false;
+        return await _dialog();
       },
     );
   }
