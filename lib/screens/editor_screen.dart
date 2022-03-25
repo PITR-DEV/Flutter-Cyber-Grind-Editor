@@ -1,9 +1,6 @@
 import 'dart:io';
 
-import 'package:cgef/helpers/platform_helper.dart';
 import 'package:cgef/widgets/exception_dialog.dart';
-import 'package:flutter/foundation.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path/path.dart' as p;
 import 'package:cgef/helpers/parsing_helper.dart';
 import 'package:cgef/state/app_state.dart';
@@ -13,8 +10,6 @@ import 'package:cgef/widgets/input/tab_button.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:layout/layout.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class EditorScreen extends StatefulWidget {
@@ -91,12 +86,6 @@ class _EditorScreenState extends State<EditorScreen> {
       var exportableString = ParsingHelper().stringifyPattern(grid);
 
       await File(outputPath).writeAsString(exportableString);
-
-      if (!PlatformHelper().isDesktop) {
-        Fluttertoast.showToast(
-            msg: 'Pattern exported to $outputPath',
-            toastLength: Toast.LENGTH_LONG);
-      }
     } catch (ex, stack) {
       spawnExceptionDialog(context, "$ex\n$stack");
     }
