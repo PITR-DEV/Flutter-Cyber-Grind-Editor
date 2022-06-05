@@ -25,9 +25,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   project.set_dart_entrypoint_arguments(std::move(command_line_arguments));
 
   FlutterWindow window(project);
-  Win32Window::Point origin(10, 10);
-  Win32Window::Size size(1280, 720);
-  if (!window.CreateAndShow(L"cgef", origin, size)) {
+  const int WIDTH = 1280, HEIGHT = 720;
+  int monitorWidth = GetSystemMetrics(SM_CXSCREEN);
+  int monitorHeight = GetSystemMetrics(SM_CYSCREEN);
+  Win32Window::Point origin((monitorWidth / 2) - (WIDTH / 2), (monitorHeight / 2) - (HEIGHT / 2));
+  Win32Window::Size size(WIDTH, HEIGHT);
+  if (!window.CreateAndShow(L"Cyber Grind Editor", origin, size)) {
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);
