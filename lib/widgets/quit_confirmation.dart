@@ -18,9 +18,8 @@ class _QuitConfirmationState extends State<QuitConfirmation> {
       builder: (context) {
         return AlertDialog(
           title: const Text('Are you sure you want to quit?'),
-          backgroundColor: Colors.black,
           actions: [
-            TextButton(
+            ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop(true);
               },

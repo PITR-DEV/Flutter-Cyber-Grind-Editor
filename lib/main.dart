@@ -44,6 +44,8 @@ class _AppRootState extends State<AppRoot> {
       title: 'Cyber Grind Editor',
       theme: ThemeData(
         brightness: Brightness.dark,
+        colorSchemeSeed: Colors.red,
+        useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
       initialRoute: '/home',
