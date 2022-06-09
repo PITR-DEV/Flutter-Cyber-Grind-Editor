@@ -68,14 +68,23 @@ class _ArenaGridState extends State<ArenaGrid> {
       child: _buildArenaGrid(context)!,
     );
 
-    return AspectRatio(
-      aspectRatio: 1,
-      child: pinchable
-          ? PinchZoom(
-              child: grid,
-              maxScale: 4,
-            )
-          : grid,
+    return Column(
+      children: [
+        Expanded(
+          child: AspectRatio(
+            aspectRatio: 1,
+            child: pinchable
+                ? PinchZoom(
+                    child: grid,
+                    maxScale: 4,
+                  )
+                : grid,
+          ),
+        ),
+        const SizedBox(
+          height: 12,
+        )
+      ],
     );
   }
 }
