@@ -6,7 +6,8 @@ import 'package:cgef/widgets/input/fat_button.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:layout/layout.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -24,9 +25,20 @@ class _HomeScreenState extends State<HomeScreen> {
     var specifyExtension =
         Platform.isWindows || Platform.isLinux || Platform.isMacOS;
 
+    String? path;
+
+    if (!specifyExtension) {
+      var strg = await getExternalStorageDirectory();
+      path = strg!.path;
+    }
+
+    // print('initial directory: $path');
+
     FilePickerResult? result = await FilePicker.platform.pickFiles(
-        allowedExtensions: specifyExtension ? ['cgp'] : null,
-        type: specifyExtension ? FileType.custom : FileType.any);
+      allowedExtensions: specifyExtension ? ['cgp'] : null,
+      type: specifyExtension ? FileType.custom : FileType.any,
+      // initialDirectory: path,
+    );
 
     if (result == null) return;
     var file = File(result.files.single.path!);
@@ -38,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _openSourceCode() async {
     const sourceUrl = 'https://gitlab.com/PITR_DEV/flutter-cyber-grind-editor';
-    await launch(sourceUrl);
+    await launchUrlString(sourceUrl, mode: LaunchMode.externalApplication);
   }
 
   void _newPattern() {
@@ -89,15 +101,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 SizedBox(
                   width: 200,
                   child: FatButton(
-                    child: const Text('NEW'),
                     onPressed: _newPattern,
+                    child: const Text('NEW'),
                   ),
                 ),
                 SizedBox(
                   width: 200,
                   child: FatButton(
-                    child: const Text('LOAD'),
                     onPressed: _openFilePicker,
+                    child: const Text('LOAD'),
                   ),
                 ),
               ],

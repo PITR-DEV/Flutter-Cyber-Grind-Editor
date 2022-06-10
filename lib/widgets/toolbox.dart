@@ -12,6 +12,7 @@ class Toolbox extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScopedModelDescendant<AppState>(
       builder: (context, child, model) => Margin(
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Column(
           children: [
             const Text(
@@ -56,7 +57,6 @@ class Toolbox extends StatelessWidget {
                 )),
           ],
         ),
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
     );
   }
