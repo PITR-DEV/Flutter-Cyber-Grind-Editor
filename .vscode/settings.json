@@ -1,0 +1,6 @@
+{
+  "files.associations": {
+    "*.sand": "json",
+    "xstring": "cpp"
+  }
+}
