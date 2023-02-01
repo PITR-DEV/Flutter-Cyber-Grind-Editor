@@ -1,33 +1,34 @@
 import 'dart:io';
 
+import 'package:cgef/helpers/grid_helper.dart';
+import 'package:cgef/providers/app_provider.dart';
 import 'package:cgef/widgets/exception_dialog.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:cgef/helpers/parsing_helper.dart';
-import 'package:cgef/state/app_state.dart';
-import 'package:cgef/state/grid_state.dart';
+import 'package:cgef/models/enums.dart';
 import 'package:cgef/widgets/arena_grid.dart';
 import 'package:cgef/widgets/input/tab_button.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:layout/layout.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:scoped_model/scoped_model.dart';
 
-class EditorScreen extends StatefulWidget {
+class EditorScreen extends ConsumerStatefulWidget {
   const EditorScreen({Key? key}) : super(key: key);
 
   @override
-  _EditorScreenState createState() => _EditorScreenState();
+  createState() => _EditorScreenState();
 }
 
-class _EditorScreenState extends State<EditorScreen> {
+class _EditorScreenState extends ConsumerState<EditorScreen> {
   String _getExportableString() {
-    var grid = ScopedModel.of<GridState>(context).grid;
+    var grid = getGrid(ref);
     var exportableString = ParsingHelper().stringifyPattern(grid);
     return exportableString;
   }
 
-  Future<void> _export() async {
+  Future<bool> export() async {
     try {
       var date = DateTime.now();
       String? outputPath;
@@ -41,32 +42,32 @@ class _EditorScreenState extends State<EditorScreen> {
         final file = File(outputPath);
         await file.writeAsString(_getExportableString());
 
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: const Text(
-                'Exported',
-              ),
-              content: SelectableText(
-                'File saved to:\n${path.path}\n\nas\n\n$fileName',
-                maxLines: 8,
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text(
-                    'ok',
-                  ),
-                )
-              ],
-            );
-          },
-        );
+        // showDialog(
+        //   context: context,
+        //   builder: (context) {
+        //     return AlertDialog(
+        //       title: const Text(
+        //         'Exported',
+        //       ),
+        //       content: SelectableText(
+        //         'File saved to:\n${path.path}\n\nas\n\n$fileName',
+        //         maxLines: 8,
+        //       ),
+        //       actions: [
+        //         TextButton(
+        //           onPressed: () {
+        //             Navigator.of(context).pop();
+        //           },
+        //           child: const Text(
+        //             'ok',
+        //           ),
+        //         )
+        //       ],
+        //     );
+        //   },
+        // );
         //print(path);
-        return;
+        return true;
       }
 
       var resEx =
@@ -110,15 +111,17 @@ class _EditorScreenState extends State<EditorScreen> {
 
       print('User selected ' + (outputPath ?? 'null'));
 
-      if (outputPath == null) return;
+      if (outputPath == null) return false;
 
       if (!outputPath.endsWith('.cgp')) {
         outputPath += '.cgp';
       }
 
       await File(outputPath).writeAsString(_getExportableString());
+      return true;
     } catch (ex, stack) {
       spawnExceptionDialog(context, "$ex\n$stack");
+      return false;
     }
   }
 
@@ -133,48 +136,46 @@ class _EditorScreenState extends State<EditorScreen> {
         child: Center(
           child: Margin(
             margin: const EdgeInsets.only(bottom: 12),
-            child: ScopedModelDescendant<AppState>(
-              builder: (context, child, model) {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    TabButton(
-                      onPressed: () => model.setTab(AppTab.heights),
-                      active: model.tab == AppTab.heights,
-                      text: 'Heights',
-                      collapsed: !gridCentered,
-                      collapsedIcon: const Icon(Icons.height),
-                    ),
-                    TabButton(
-                      onPressed: () => model.setTab(AppTab.prefabs),
-                      active: model.tab == AppTab.prefabs,
-                      text: 'Prefabs',
-                      collapsed: !gridCentered,
-                      collapsedIcon: const Icon(Icons.widgets),
-                    ),
-                    TabButton(
-                      onPressed: _export,
-                      text: 'Export',
-                      collapsed: !gridCentered,
-                      collapsedIcon: const Icon(Icons.save),
-                    )
-                  ],
-                );
-              },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TabButton(
+                  onPressed: () {
+                    ref.read(tabProvider.notifier).state = AppTab.heights;
+                    ref.read(selectedGridBlockProvider.notifier).state = null;
+                  },
+                  active: ref.watch(tabProvider) == AppTab.heights,
+                  text: 'Heights',
+                  collapsed: !gridCentered,
+                  collapsedIcon: const Icon(Icons.height),
+                ),
+                TabButton(
+                  onPressed: () {
+                    ref.read(tabProvider.notifier).state = AppTab.prefabs;
+                    ref.read(selectedGridBlockProvider.notifier).state = null;
+                  },
+                  active: ref.watch(tabProvider) == AppTab.prefabs,
+                  text: 'Prefabs',
+                  collapsed: !gridCentered,
+                  collapsedIcon: const Icon(Icons.widgets),
+                ),
+                TabButton(
+                  onPressed: export,
+                  text: 'Export',
+                  collapsed: !gridCentered,
+                  collapsedIcon: const Icon(Icons.save),
+                )
+              ],
             ),
           ),
         ),
       ),
-      body: ScopedModelDescendant<GridState>(
-        builder: (context, child, model) {
-          return gridCentered
-              ? Center(
-                  child: ArenaGrid(model),
-                )
-              : ArenaGrid(model);
-        },
-      ),
+      body: gridCentered
+          ? const Center(
+              child: ArenaGrid(),
+            )
+          : ArenaGrid(),
     );
   }
 }

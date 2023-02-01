@@ -1,32 +1,28 @@
+import 'package:cgef/helpers/grid_helper.dart';
 import 'package:cgef/helpers/parsing_helper.dart';
-import 'package:cgef/state/app_state.dart';
-import 'package:cgef/state/grid_state.dart';
+import 'package:cgef/providers/grid_provider.dart';
 import 'package:cgef/widgets/input/grid_block_button.dart';
 import 'package:cgef/widgets/pinch_zoom_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:layout/layout.dart';
 
-class ArenaGrid extends StatefulWidget {
-  const ArenaGrid(this.model, {Key? key}) : super(key: key);
-
-  final GridState model;
+class ArenaGrid extends ConsumerStatefulWidget {
+  const ArenaGrid({Key? key}) : super(key: key);
 
   @override
-  _ArenaGridState createState() => _ArenaGridState();
+  createState() => _ArenaGridState();
 }
 
-class _ArenaGridState extends State<ArenaGrid> {
+class _ArenaGridState extends ConsumerState<ArenaGrid> {
   List<Widget> _generateGridBlocks() {
-    final appState = AppState.of(context);
-
     return List.generate(
       ParsingHelper.arenaSize * ParsingHelper.arenaSize,
-      (index) {
-        final block = widget.model.grid[index % ParsingHelper.arenaSize]
-            [index ~/ ParsingHelper.arenaSize];
-
-        return GridBlockButton(block,
-            appState: appState, gridState: widget.model);
+      (i) {
+        // top left corner 0,0
+        // cell to the right 1,0
+        final index = i;
+        return GridBlockButton(index);
       },
     );
   }
@@ -59,12 +55,10 @@ class _ArenaGridState extends State<ArenaGrid> {
   @override
   Widget build(BuildContext context) {
     final pinchable = context.breakpoint <= LayoutBreakpoint.xs;
-    final appState = AppState.of(context);
-    final gridState = GridState.of(context);
 
     final grid = Listener(
-      onPointerDown: (event) => gridState.paintStart(appState),
-      onPointerUp: (event) => gridState.paintStop(appState),
+      onPointerDown: (event) => paintStart(ref),
+      onPointerUp: (event) => paintStop(ref),
       child: _buildArenaGrid(context)!,
     );
 
@@ -75,8 +69,8 @@ class _ArenaGridState extends State<ArenaGrid> {
             aspectRatio: 1,
             child: pinchable
                 ? PinchZoom(
-                    child: grid,
                     maxScale: 4,
+                    child: grid,
                   )
                 : grid,
           ),

@@ -1,27 +1,28 @@
 import 'dart:io';
 
-import 'package:cgef/state/app_state.dart';
-import 'package:cgef/state/grid_state.dart';
+import 'package:cgef/providers/app_provider.dart';
+import 'package:cgef/providers/grid_provider.dart';
+import 'package:cgef/models/enums.dart';
 import 'package:cgef/widgets/input/fat_button.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:layout/layout.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   String appVersion = '';
 
   void _openFilePicker() async {
-    AppState.of(context).setPastHome();
-
     var specifyExtension =
         Platform.isWindows || Platform.isLinux || Platform.isMacOS;
 
@@ -43,26 +44,37 @@ class _HomeScreenState extends State<HomeScreen> {
     if (result == null) return;
     var file = File(result.files.single.path!);
     file.readAsString().then((String contents) {
-      GridState.of(context).loadFromString(contents);
+      loadFromString(ref, contents);
+      ref.read(pastHomeProvider.notifier).state = true;
       Navigator.of(context).pushNamed('/editor');
     });
   }
 
   void _openSourceCode() async {
-    const sourceUrl = 'https://gitlab.com/PITR_DEV/flutter-cyber-grind-editor';
+    const sourceUrl = 'https://pitr.dev/cgef_dl';
     await launchUrlString(sourceUrl, mode: LaunchMode.externalApplication);
   }
 
   void _newPattern() {
-    AppState.of(context).setPastHome();
-    GridState.of(context).resetPattern();
+    ref.read(pastHomeProvider.notifier).state = true;
+    resetPattern(ref);
     Navigator.pushNamed(context, '/editor');
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    PackageInfo.fromPlatform().then((PackageInfo packageInfo) {
+      setState(() {
+        appVersion = '${packageInfo.version}+${packageInfo.buildNumber}';
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     var bigLogo = context.breakpoint > LayoutBreakpoint.xs;
-    var showContinue = AppState.of(context).pastHome;
+    var showContinue = ref.read(pastHomeProvider);
 
     return Scaffold(
       body: Stack(
@@ -123,11 +135,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  const Text(
-                    'CGEF ',
+                  Text(
+                    'CGEF $appVersion',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onBackground
+                          .withAlpha(120),
                     ),
                   ),
                   const SizedBox(
@@ -138,6 +153,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: const Text('Source Code'),
                   ),
                 ],
+              ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: Container(
+              margin: const EdgeInsets.all(20),
+              child: IconButton(
+                tooltip: 'Settings',
+                icon: const Icon(Icons.settings),
+                onPressed: () {
+                  Navigator.pushNamed(context, '/settings');
+                },
               ),
             ),
           )

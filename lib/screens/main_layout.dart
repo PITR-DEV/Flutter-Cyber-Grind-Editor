@@ -1,20 +1,24 @@
-import 'package:cgef/state/app_state.dart';
+import 'package:cgef/models/enums.dart';
+import 'package:cgef/providers/app_provider.dart';
+import 'package:cgef/providers/grid_provider.dart';
+import 'package:cgef/providers/pref_provider.dart';
 import 'package:cgef/widgets/prefab_selector.dart';
 import 'package:cgef/widgets/tool_options.dart';
 import 'package:cgef/widgets/toolbox.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:layout/layout.dart';
 
-class MainLayout extends StatefulWidget {
+class MainLayout extends ConsumerStatefulWidget {
   const MainLayout({Key? key, required this.content}) : super(key: key);
   final Widget content;
 
   @override
-  State<MainLayout> createState() => _MainLayoutState();
+  createState() => _MainLayoutState();
 }
 
-class _MainLayoutState extends State<MainLayout> {
+class _MainLayoutState extends ConsumerState<MainLayout> {
   final FocusNode _focusNode = FocusNode();
 
   @override
@@ -38,7 +42,7 @@ class _MainLayoutState extends State<MainLayout> {
   @override
   Widget build(BuildContext context) {
     var rowChildren = <Widget>[];
-    var secondaryDrawer = AppState.of(context).tab == AppTab.heights
+    var secondaryDrawer = ref.watch(tabProvider) == AppTab.heights
         ? const ToolOptions()
         : const PrefabSelector();
     Widget finalLayout;
@@ -94,17 +98,21 @@ class _MainLayoutState extends State<MainLayout> {
       body: widget.content,
       drawer: Drawer(
         child: ListView(
-          children: [const Toolbox(), secondaryDrawer],
+          children: [
+            const Toolbox(),
+            secondaryDrawer,
+          ],
         ),
       ),
     );
 
     return Focus(
       child: RawKeyboardListener(
-          autofocus: true,
-          focusNode: _focusNode,
-          onKey: _handleKeyEvent,
-          child: finalLayout),
+        autofocus: true,
+        focusNode: _focusNode,
+        onKey: _handleKeyEvent,
+        child: finalLayout,
+      ),
       onFocusChange: (value) {
         if (!value) _focusNode.requestFocus();
       },

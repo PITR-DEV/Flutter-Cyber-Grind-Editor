@@ -4,13 +4,26 @@ import 'package:flutter/services.dart';
 import 'package:layout/layout.dart';
 
 class FatInput extends StatelessWidget {
-  const FatInput({Key? key, this.controller, this.onChanged}) : super(key: key);
+  const FatInput({
+    Key? key,
+    this.controller,
+    this.onChanged,
+    this.customBorderRadius,
+  }) : super(key: key);
   final TextEditingController? controller;
   final Function(String)? onChanged;
+  final BorderRadius? customBorderRadius;
 
   @override
   Widget build(BuildContext context) {
+    final radius = customBorderRadius != null
+        ? customBorderRadius!
+        : const BorderRadius.only(
+            bottomLeft: Radius.circular(8),
+            bottomRight: Radius.circular(8),
+          );
     return Margin(
+      margin: const EdgeInsets.only(bottom: LayoutHelper.standardMargin),
       child: SizedBox(
         width: double.infinity,
         child: TextField(
@@ -39,37 +52,23 @@ class FatInput extends StatelessWidget {
           onChanged: onChanged,
           keyboardType: TextInputType.number,
           cursorColor: Colors.white,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(8),
-                bottomRight: Radius.circular(8),
-              ),
-            ),
+          decoration: InputDecoration(
+            border: OutlineInputBorder(borderRadius: radius),
             enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                color: Colors.white,
-                width: 3,
-              ),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(8),
-                bottomRight: Radius.circular(8),
-              ),
-            ),
+                borderSide: BorderSide(
+                  color: Colors.white,
+                  width: 3,
+                ),
+                borderRadius: radius),
             focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                color: Colors.red,
-                width: 3,
-              ),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(8),
-                bottomRight: Radius.circular(8),
-              ),
-            ),
+                borderSide: BorderSide(
+                  color: Colors.red,
+                  width: 3,
+                ),
+                borderRadius: radius),
           ),
         ),
       ),
-      margin: const EdgeInsets.only(bottom: LayoutHelper.standardMargin),
     );
   }
 }
