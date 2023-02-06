@@ -28,9 +28,11 @@ class GridBlockButton extends ConsumerWidget {
     return InkWell(
       enableFeedback: false,
       onTap: () {
-        onClickBlock(ref, block.index);
+        // onClickBlock(ref, block.index);
       },
-      onHover: (value) => {if (value) hoverOverBlock(ref, block.index)},
+      onHover: (value) => {
+        // if (value) hoverOverBlock(ref, block.index)
+      },
       child: Stack(
         alignment: Alignment.bottomLeft,
         children: [

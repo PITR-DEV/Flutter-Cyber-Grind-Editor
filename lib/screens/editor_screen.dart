@@ -2,13 +2,14 @@ import 'dart:io';
 
 import 'package:cgef/helpers/grid_helper.dart';
 import 'package:cgef/providers/app_provider.dart';
-import 'package:cgef/widgets/exception_dialog.dart';
+import 'package:cgef/components/exception_dialog.dart';
+import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:cgef/helpers/parsing_helper.dart';
 import 'package:cgef/models/enums.dart';
-import 'package:cgef/widgets/arena_grid.dart';
-import 'package:cgef/widgets/input/tab_button.dart';
+import 'package:cgef/components/arena_grid.dart';
+import 'package:cgef/components/input/tab_button.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:layout/layout.dart';
@@ -23,7 +24,7 @@ class EditorScreen extends ConsumerStatefulWidget {
 
 class _EditorScreenState extends ConsumerState<EditorScreen> {
   String _getExportableString() {
-    var grid = getGrid(ref);
+    var grid = getGrid(ComponentRef(ref));
     var exportableString = ParsingHelper().stringifyPattern(grid);
     return exportableString;
   }

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:cgef/providers/app_provider.dart';
 import 'package:cgef/providers/grid_provider.dart';
 import 'package:cgef/models/enums.dart';
-import 'package:cgef/widgets/input/fat_button.dart';
+import 'package:cgef/components/input/fat_button.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

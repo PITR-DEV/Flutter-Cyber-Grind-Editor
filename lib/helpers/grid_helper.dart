@@ -1,10 +1,11 @@
 import 'package:cgef/helpers/parsing_helper.dart';
 import 'package:cgef/models/grid_block.dart';
 import 'package:cgef/providers/grid_provider.dart';
+import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 StateController getGridBlockNotifier(
-  WidgetRef ref,
+  ComponentRef ref,
   int x,
   int y,
 ) {
@@ -17,7 +18,7 @@ int gridHeightLimiter(int value) {
   return value;
 }
 
-List<List<GridBlock>> getGrid(WidgetRef ref) {
+List<List<GridBlock>> getGrid(ComponentRef ref) {
   final grid = <List<GridBlock>>[];
   for (int x = 0; x < ParsingHelper.arenaSize; x++) {
     final row = <GridBlock>[];

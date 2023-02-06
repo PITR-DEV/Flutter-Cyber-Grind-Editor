@@ -1,3 +1,4 @@
+import 'package:cgef/components/debug_overlay.dart';
 import 'package:cgef/providers/app_provider.dart';
 import 'package:cgef/providers/grid_provider.dart';
 import 'package:cgef/providers/pref_provider.dart';
@@ -5,7 +6,7 @@ import 'package:cgef/screens/main_layout.dart';
 import 'package:cgef/screens/editor_screen.dart';
 import 'package:cgef/screens/home_screen.dart';
 import 'package:cgef/screens/settings.dart';
-import 'package:cgef/widgets/quit_confirmation.dart';
+import 'package:cgef/components/quit_confirmation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_window_close/flutter_window_close.dart';
@@ -68,28 +69,10 @@ class _AppRootState extends ConsumerState<AppRoot> {
           children: [
             child!,
             if (ref.watch(Preferences.debugOverlay))
-              Positioned(
-                top: 8,
+              const Positioned(
+                bottom: 8,
                 left: 8,
-                child: IgnorePointer(
-                  child: Text(
-                    'tab: ${ref.watch(tabProvider)}\n'
-                    'tool: ${ref.watch(toolProvider)}\n'
-                    'toolModifier: ${ref.watch(toolModifierProvider)}\n'
-                    'selectedPrefabProvider: ${ref.watch(selectedPrefabProvider)}\n'
-                    'pastHome: ${ref.watch(pastHomeProvider)}\n'
-                    'hovered: [${ref.watch(hoveredProvider).join(', ')}]\n'
-                    'isPainting: ${ref.watch(isPaintingProvider)}\n'
-                    'painted: [${ref.watch(paintedOverProvider).join(', ')}]',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.normal,
-                      decoration: TextDecoration.none,
-                      backgroundColor: Colors.black.withAlpha(170),
-                    ),
-                  ),
-                ),
+                child: DebugOverlay(),
               ),
           ],
         );

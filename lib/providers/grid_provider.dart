@@ -4,6 +4,7 @@ import 'package:cgef/models/grid_block.dart';
 import 'package:cgef/providers/app_provider.dart';
 import 'package:cgef/models/enums.dart';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final gridProvider = StateProvider.family<GridBlock, int>(
@@ -40,7 +41,7 @@ void loadFromString(WidgetRef ref, String source) {
   }
 }
 
-List<int> computeFill(WidgetRef ref, int x1, int y1, int x2, int y2) {
+List<int> computeFill(ComponentRef ref, int x1, int y1, int x2, int y2) {
   // Compute the fill of a rectangle
   if (x1 > x2) {
     final temp = x1;
@@ -62,7 +63,7 @@ List<int> computeFill(WidgetRef ref, int x1, int y1, int x2, int y2) {
   return relevantBlocks.map((e) => e.index).toList();
 }
 
-List<int> computeRectOutline(WidgetRef ref, int x1, int y1, int x2, int y2) {
+List<int> computeRectOutline(ComponentRef ref, int x1, int y1, int x2, int y2) {
   // Compute the outline of a rectangle
   if (x1 > x2) {
     final temp = x1;
@@ -87,7 +88,7 @@ List<int> computeRectOutline(WidgetRef ref, int x1, int y1, int x2, int y2) {
   return relevantBlocks.map((e) => e.index).toList();
 }
 
-void onClickBlock(WidgetRef ref, int index) {
+void onClickBlock(ComponentRef ref, int index) {
   // When a block is clicked
   final toolSelected = ref.read(selectedGridBlockProvider);
   final x = index % ParsingHelper.arenaSize;
@@ -141,7 +142,7 @@ void onClickBlock(WidgetRef ref, int index) {
 // - x: The x coordinate of the block in the grid
 // - y: The y coordinate of the block in the grid
 
-void affectBlock(WidgetRef ref, int index) {
+void affectBlock(ComponentRef ref, int index) {
   final activeTab = ref.read(tabProvider);
   final x = index ~/ ParsingHelper.arenaSize;
   final y = index % ParsingHelper.arenaSize;
@@ -192,24 +193,17 @@ void affectBlock(WidgetRef ref, int index) {
   }
 }
 
-void hoverOverBlock(WidgetRef ref, int index) {
+void hoverOverBlock(ComponentRef ref, int index) {
   final selectedBlock = ref.read(selectedGridBlockProvider);
   final currentTool = ref.read(toolProvider);
   final isPainting = ref.read(isPaintingProvider);
 
   if (currentTool != Tool.brush || !isPainting) resetHover(ref);
   setHover(ref, index, heavy: currentTool == Tool.brush && isPainting);
-  // hover neighbors
   switch (currentTool) {
     case Tool.brush:
       computePaint(ref);
       break;
-    // TODO different brush sizes
-    /*setHover(x - 1, y);
-        setHover(x + 1, y);
-        setHover(x, y - 1);
-        setHover(x, y + 1);
-        break;*/
     case Tool.outlineRect:
     case Tool.fillRect:
       if (selectedBlock == null) {
@@ -245,7 +239,7 @@ void hoverOverBlock(WidgetRef ref, int index) {
   }
 }
 
-void paintStart(WidgetRef ref) {
+void paintStart(ComponentRef ref) {
   if (ref.read(toolProvider) != Tool.brush) return;
 
   ref.read(isPaintingProvider.notifier).state = true;
@@ -263,12 +257,12 @@ void paintStart(WidgetRef ref) {
   computePaint(ref);
 }
 
-void paintStop(WidgetRef ref) {
+void paintStop(ComponentRef ref) {
   ref.read(isPaintingProvider.notifier).state = false;
   resetHover(ref);
 }
 
-void computePaint(WidgetRef ref) {
+void computePaint(ComponentRef ref) {
   if (!ref.read(isPaintingProvider)) return;
 
   final paintedNotif = ref.read(paintedOverProvider.notifier);
@@ -284,13 +278,13 @@ void computePaint(WidgetRef ref) {
   }
 }
 
-void resetHover(WidgetRef ref) {
+void resetHover(ComponentRef ref) {
   ref.read(hoveredProvider.notifier).state = ref.read(hoveredProvider).clear();
   ref.read(paintedOverProvider.notifier).state =
       ref.read(paintedOverProvider).clear();
 }
 
-void setHover(WidgetRef ref, int index, {bool heavy = false}) {
+void setHover(ComponentRef ref, int index, {bool heavy = false}) {
   final x = index % ParsingHelper.arenaSize;
   final y = index ~/ ParsingHelper.arenaSize;
   if (x < 0 ||
@@ -301,8 +295,7 @@ void setHover(WidgetRef ref, int index, {bool heavy = false}) {
   }
 
   final hovered = ref.read(hoveredProvider);
-  if (hovered.contains(index)) return;
   ref.read(hoveredProvider.notifier).state =
       ref.read(hoveredProvider).add(x + y * ParsingHelper.arenaSize);
-  print('hovered: $x, $y');
+  // print('hovered: $x, $y');
 }

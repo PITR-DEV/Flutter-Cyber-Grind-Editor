@@ -1,7 +1,7 @@
 import 'package:cgef/models/enums.dart';
 import 'package:cgef/providers/app_provider.dart';
-import 'package:cgef/widgets/input/fat_button.dart';
-import 'package:cgef/widgets/input/fat_input.dart';
+import 'package:cgef/components/input/fat_button.dart';
+import 'package:cgef/components/input/fat_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:layout/layout.dart';
