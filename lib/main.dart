@@ -59,7 +59,7 @@ class _AppRootState extends ConsumerState<AppRoot> {
         '/home': (context) => const HomeScreen(),
         '/editor': (context) => const QuitConfirmation(
               MainLayout(
-                content: EditorScreen(),
+                content: EditorScreen(key: ValueKey('editor')),
               ),
             ),
         '/settings': (context) => const SettingsPage(),

@@ -47,6 +47,7 @@ class _ArenaGridState extends ConsumerState<ArenaGrid> {
         onPointerHover: (event) =>
             game.updateCursorPosition(event.localPosition),
         child: GameWidget(
+          key: const Key('grid'),
           game: game,
         ),
       ),
@@ -62,7 +63,9 @@ class _ArenaGridState extends ConsumerState<ArenaGrid> {
     return Column(
       children: [
         Expanded(
-          child: AspectRatio(aspectRatio: 1, child: grid),
+          child: Center(
+            child: AspectRatio(aspectRatio: 1, child: grid),
+          ),
         ),
         const SizedBox(
           height: 12,

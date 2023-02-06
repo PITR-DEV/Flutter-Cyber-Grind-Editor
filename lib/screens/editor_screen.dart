@@ -174,9 +174,13 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
       ),
       body: gridCentered
           ? const Center(
-              child: ArenaGrid(),
+              child: ArenaGrid(
+                key: Key('ArenaGrid'),
+              ),
             )
-          : ArenaGrid(),
+          : const ArenaGrid(
+              key: Key('ArenaGrid'),
+            ),
     );
   }
 }
