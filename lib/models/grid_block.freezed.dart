@@ -19,6 +19,8 @@ mixin _$GridBlock {
   int get height => throw _privateConstructorUsedError;
   String get prefab => throw _privateConstructorUsedError;
   int get index => throw _privateConstructorUsedError;
+  bool get isHovered => throw _privateConstructorUsedError;
+  bool get isPaintedOver => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $GridBlockCopyWith<GridBlock> get copyWith =>
@@ -30,7 +32,12 @@ abstract class $GridBlockCopyWith<$Res> {
   factory $GridBlockCopyWith(GridBlock value, $Res Function(GridBlock) then) =
       _$GridBlockCopyWithImpl<$Res, GridBlock>;
   @useResult
-  $Res call({int height, String prefab, int index});
+  $Res call(
+      {int height,
+      String prefab,
+      int index,
+      bool isHovered,
+      bool isPaintedOver});
 }
 
 /// @nodoc
@@ -49,6 +56,8 @@ class _$GridBlockCopyWithImpl<$Res, $Val extends GridBlock>
     Object? height = null,
     Object? prefab = null,
     Object? index = null,
+    Object? isHovered = null,
+    Object? isPaintedOver = null,
   }) {
     return _then(_value.copyWith(
       height: null == height
@@ -63,6 +72,14 @@ class _$GridBlockCopyWithImpl<$Res, $Val extends GridBlock>
           ? _value.index
           : index // ignore: cast_nullable_to_non_nullable
               as int,
+      isHovered: null == isHovered
+          ? _value.isHovered
+          : isHovered // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isPaintedOver: null == isPaintedOver
+          ? _value.isPaintedOver
+          : isPaintedOver // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -74,7 +91,12 @@ abstract class _$$_GridBlockCopyWith<$Res> implements $GridBlockCopyWith<$Res> {
       __$$_GridBlockCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({int height, String prefab, int index});
+  $Res call(
+      {int height,
+      String prefab,
+      int index,
+      bool isHovered,
+      bool isPaintedOver});
 }
 
 /// @nodoc
@@ -91,6 +113,8 @@ class __$$_GridBlockCopyWithImpl<$Res>
     Object? height = null,
     Object? prefab = null,
     Object? index = null,
+    Object? isHovered = null,
+    Object? isPaintedOver = null,
   }) {
     return _then(_$_GridBlock(
       height: null == height
@@ -105,6 +129,14 @@ class __$$_GridBlockCopyWithImpl<$Res>
           ? _value.index
           : index // ignore: cast_nullable_to_non_nullable
               as int,
+      isHovered: null == isHovered
+          ? _value.isHovered
+          : isHovered // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isPaintedOver: null == isPaintedOver
+          ? _value.isPaintedOver
+          : isPaintedOver // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -113,7 +145,11 @@ class __$$_GridBlockCopyWithImpl<$Res>
 
 class _$_GridBlock implements _GridBlock {
   const _$_GridBlock(
-      {required this.height, required this.prefab, required this.index});
+      {required this.height,
+      required this.prefab,
+      required this.index,
+      required this.isHovered,
+      required this.isPaintedOver});
 
   @override
   final int height;
@@ -121,10 +157,14 @@ class _$_GridBlock implements _GridBlock {
   final String prefab;
   @override
   final int index;
+  @override
+  final bool isHovered;
+  @override
+  final bool isPaintedOver;
 
   @override
   String toString() {
-    return 'GridBlock(height: $height, prefab: $prefab, index: $index)';
+    return 'GridBlock(height: $height, prefab: $prefab, index: $index, isHovered: $isHovered, isPaintedOver: $isPaintedOver)';
   }
 
   @override
@@ -134,11 +174,16 @@ class _$_GridBlock implements _GridBlock {
             other is _$_GridBlock &&
             (identical(other.height, height) || other.height == height) &&
             (identical(other.prefab, prefab) || other.prefab == prefab) &&
-            (identical(other.index, index) || other.index == index));
+            (identical(other.index, index) || other.index == index) &&
+            (identical(other.isHovered, isHovered) ||
+                other.isHovered == isHovered) &&
+            (identical(other.isPaintedOver, isPaintedOver) ||
+                other.isPaintedOver == isPaintedOver));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, height, prefab, index);
+  int get hashCode =>
+      Object.hash(runtimeType, height, prefab, index, isHovered, isPaintedOver);
 
   @JsonKey(ignore: true)
   @override
@@ -151,7 +196,9 @@ abstract class _GridBlock implements GridBlock {
   const factory _GridBlock(
       {required final int height,
       required final String prefab,
-      required final int index}) = _$_GridBlock;
+      required final int index,
+      required final bool isHovered,
+      required final bool isPaintedOver}) = _$_GridBlock;
 
   @override
   int get height;
@@ -159,6 +206,10 @@ abstract class _GridBlock implements GridBlock {
   String get prefab;
   @override
   int get index;
+  @override
+  bool get isHovered;
+  @override
+  bool get isPaintedOver;
   @override
   @JsonKey(ignore: true)
   _$$_GridBlockCopyWith<_$_GridBlock> get copyWith =>

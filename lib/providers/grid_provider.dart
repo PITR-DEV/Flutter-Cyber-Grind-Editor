@@ -9,7 +9,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final gridProvider = StateProvider.family<GridBlock, int>(
   (ref, index) {
-    return GridBlock(height: 0, prefab: '0', index: index);
+    return GridBlock(
+      height: 0,
+      prefab: '0',
+      index: index,
+      isHovered: false,
+      isPaintedOver: false,
+    );
   },
 );
 
@@ -25,6 +31,8 @@ void resetPattern(WidgetRef ref) {
       height: 0,
       prefab: '0',
       index: i,
+      isHovered: false,
+      isPaintedOver: false,
     );
   }
   ref.read(paintedOverProvider.notifier).state = <int>[].lock;
@@ -279,6 +287,13 @@ void computePaint(ComponentRef ref) {
 }
 
 void resetHover(ComponentRef ref) {
+  final hoveredNotifier = ref.read(hoveredProvider.notifier);
+  for (var index in hoveredNotifier.state) {
+    final cellNotifier = ref.read(gridProvider(index).notifier);
+    cellNotifier.state =
+        cellNotifier.state.copyWith(isHovered: false, isPaintedOver: false);
+  }
+
   ref.read(hoveredProvider.notifier).state = ref.read(hoveredProvider).clear();
   ref.read(paintedOverProvider.notifier).state =
       ref.read(paintedOverProvider).clear();
@@ -297,5 +312,6 @@ void setHover(ComponentRef ref, int index, {bool heavy = false}) {
   final hovered = ref.read(hoveredProvider);
   ref.read(hoveredProvider.notifier).state =
       ref.read(hoveredProvider).add(x + y * ParsingHelper.arenaSize);
-  // print('hovered: $x, $y');
+  final cellNotifier = ref.read(gridProvider(index).notifier);
+  cellNotifier.state = cellNotifier.state.copyWith(isHovered: true);
 }

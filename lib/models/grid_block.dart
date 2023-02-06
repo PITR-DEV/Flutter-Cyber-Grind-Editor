@@ -8,5 +8,7 @@ class GridBlock with _$GridBlock {
     required int height,
     required String prefab,
     required int index,
+    required bool isHovered,
+    required bool isPaintedOver,
   }) = _GridBlock;
 }

@@ -50,49 +50,45 @@ class GridBlockComponent extends RectangleComponent
       if (next != null) {
         // this.setColor(Colors.red);
         text!.text = next.height.toString();
-      }
-    });
 
-    listen(paintedOverProvider, (_, IList<int>? next) {
-      if (next != null && next.contains(index)) {
-        var color = ColorHelper.heightToColor(thisBlock.height);
-        color = Color.alphaBlend(Colors.red.withOpacity(0.2), color);
-        this.setColor(color);
-      } else {
-        this.setColor(
-          ColorHelper.heightToColor(thisBlock.height),
-        );
-        // move cell to bottom
-        priority = 0;
-        if (hover != null) {
-          parent?.remove(hover!);
-          hover = null;
+        if (next.isPaintedOver) {
+          var color = ColorHelper.heightToColor(thisBlock.height);
+          color = Color.alphaBlend(Colors.red.withOpacity(0.2), color);
+          this.setColor(color);
+        } else {
+          this.setColor(
+            ColorHelper.heightToColor(thisBlock.height),
+          );
+          // move cell to bottom
+          priority = 0;
+          if (hover != null) {
+            parent?.remove(hover!);
+            hover = null;
+          }
         }
-      }
-    });
 
-    listen(hoveredProvider, (_, IList<int>? next) {
-      if (next != null && next.contains(index)) {
-        if (hover == null) {
-          hover = RectangleComponent(
-            position: position + Vector2.all(cellSize() / 2),
-            size: Vector2(width * 1.1, height * 1.1),
-            anchor: Anchor.center,
-            priority: 50,
-          )..setColor(Colors.red);
-          parent?.add(hover!);
-          // move cell to top
-          priority = 80;
-        }
-      } else {
-        setColor(
-          ColorHelper.heightToColor(thisBlock.height),
-        );
-        // move cell to bottom
-        priority = 0;
-        if (hover != null) {
-          parent?.remove(hover!);
-          hover = null;
+        if (next.isHovered) {
+          if (hover == null) {
+            hover = RectangleComponent(
+              position: position + Vector2.all(cellSize() / 2),
+              size: Vector2(width * 1.1, height * 1.1),
+              anchor: Anchor.center,
+              priority: 50,
+            )..setColor(Colors.red);
+            parent?.add(hover!);
+            // move cell to top
+            priority = 80;
+          }
+        } else {
+          setColor(
+            ColorHelper.heightToColor(thisBlock.height),
+          );
+          // move cell to bottom
+          priority = 0;
+          if (hover != null) {
+            parent?.remove(hover!);
+            hover = null;
+          }
         }
       }
     });

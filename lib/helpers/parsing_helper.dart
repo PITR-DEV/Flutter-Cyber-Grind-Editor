@@ -18,6 +18,8 @@ class ParsingHelper {
                 height: 0,
                 prefab: '0',
                 index: x * arenaSize + y,
+                isHovered: false,
+                isPaintedOver: false,
               ),
             ),
         growable: false);
