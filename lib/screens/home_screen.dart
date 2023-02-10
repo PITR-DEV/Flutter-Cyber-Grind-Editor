@@ -55,12 +55,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     await launchUrlString(sourceUrl, mode: LaunchMode.externalApplication);
   }
 
-  void _newPattern() {
-    ref.read(pastHomeProvider.notifier).state = true;
-    resetPattern(ref);
-    Navigator.pushNamed(context, '/editor');
-  }
-
   @override
   void initState() {
     super.initState();
@@ -113,7 +107,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 SizedBox(
                   width: 200,
                   child: FatButton(
-                    onPressed: _newPattern,
+                    onPressed: () {
+                      newPattern(ref);
+                      Navigator.pushNamed(context, '/editor');
+                    },
                     child: const Text('NEW'),
                   ),
                 ),

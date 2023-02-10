@@ -28,6 +28,21 @@ class SettingsPage extends ConsumerWidget {
               leading: const Icon(Icons.color_lens),
             ),
             ListTile(
+              title: const Text('Show Editor App Bar'),
+              subtitle: const Text('Show the navigation app bar in the editor'),
+              trailing: Switch(
+                value: ref.watch(Preferences.showEditorAppBar),
+                onChanged: (value) {
+                  ref.read(Preferences.showEditorAppBar.notifier).state = value;
+                },
+              ),
+              leading: const Icon(Icons.arrow_back),
+            ),
+            const Divider(
+              thickness: 1,
+              height: 1,
+            ),
+            ListTile(
               title: const Text('Debug Overlay'),
               subtitle: const Text('Display the debug overlay'),
               trailing: Switch(
@@ -37,7 +52,7 @@ class SettingsPage extends ConsumerWidget {
                 },
               ),
               leading: const Icon(Icons.bug_report),
-            )
+            ),
           ]),
         ),
       ),

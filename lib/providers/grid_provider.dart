@@ -24,6 +24,11 @@ final paintedOverProvider = StateProvider((ref) => <int>[].lock);
 
 final isPaintingProvider = StateProvider((ref) => false);
 
+void newPattern(WidgetRef ref) {
+  ref.read(pastHomeProvider.notifier).state = true;
+  resetPattern(ref);
+}
+
 void resetPattern(WidgetRef ref) {
   // Reset all state
   for (int i = 0; i < ParsingHelper.arenaSize * ParsingHelper.arenaSize; i++) {
@@ -252,8 +257,8 @@ void paintStart(ComponentRef ref) {
 
   ref.read(isPaintingProvider.notifier).state = true;
 
+  // create initial state. Mark first (starting) cell as painted over
   var indexes = List.from(ref.read(hoveredProvider));
-
   for (var index in indexes) {
     setHover(
       ref,
@@ -313,5 +318,8 @@ void setHover(ComponentRef ref, int index, {bool heavy = false}) {
   ref.read(hoveredProvider.notifier).state =
       ref.read(hoveredProvider).add(x + y * ParsingHelper.arenaSize);
   final cellNotifier = ref.read(gridProvider(index).notifier);
-  cellNotifier.state = cellNotifier.state.copyWith(isHovered: true);
+  cellNotifier.state = cellNotifier.state.copyWith(
+    isHovered: true,
+    isPaintedOver: heavy,
+  );
 }

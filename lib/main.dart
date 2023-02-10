@@ -58,24 +58,24 @@ class _AppRootState extends ConsumerState<AppRoot> {
       routes: {
         '/home': (context) => const HomeScreen(),
         '/editor': (context) => const QuitConfirmation(
-              MainLayout(
-                content: EditorScreen(key: ValueKey('editor')),
-              ),
+              MainLayout(),
             ),
         '/settings': (context) => const SettingsPage(),
       },
       builder: (context, child) {
-        return Stack(
-          children: [
-            child!,
-            if (ref.watch(Preferences.debugOverlay))
+        if (ref.watch(Preferences.debugOverlay)) {
+          return Stack(
+            children: [
+              child!,
               const Positioned(
                 bottom: 8,
                 left: 8,
                 child: DebugOverlay(),
               ),
-          ],
-        );
+            ],
+          );
+        }
+        return child!;
       },
     );
   }

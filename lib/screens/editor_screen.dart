@@ -140,34 +140,7 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TabButton(
-                  onPressed: () {
-                    ref.read(tabProvider.notifier).state = AppTab.heights;
-                    ref.read(selectedGridBlockProvider.notifier).state = null;
-                  },
-                  active: ref.watch(tabProvider) == AppTab.heights,
-                  text: 'Heights',
-                  collapsed: !gridCentered,
-                  collapsedIcon: const Icon(Icons.height),
-                ),
-                TabButton(
-                  onPressed: () {
-                    ref.read(tabProvider.notifier).state = AppTab.prefabs;
-                    ref.read(selectedGridBlockProvider.notifier).state = null;
-                  },
-                  active: ref.watch(tabProvider) == AppTab.prefabs,
-                  text: 'Prefabs',
-                  collapsed: !gridCentered,
-                  collapsedIcon: const Icon(Icons.widgets),
-                ),
-                TabButton(
-                  onPressed: export,
-                  text: 'Export',
-                  collapsed: !gridCentered,
-                  collapsedIcon: const Icon(Icons.save),
-                )
-              ],
+              children: [],
             ),
           ),
         ),

@@ -6,7 +6,7 @@ class QuitConfirmation extends StatefulWidget {
   final Widget child;
 
   @override
-  _QuitConfirmationState createState() => _QuitConfirmationState();
+  createState() => _QuitConfirmationState();
 }
 
 class _QuitConfirmationState extends State<QuitConfirmation> {

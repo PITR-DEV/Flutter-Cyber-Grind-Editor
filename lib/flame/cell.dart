@@ -22,6 +22,7 @@ class GridBlockComponent extends RectangleComponent
   RectangleComponent? hover;
 
   GridBlock get thisBlock => ref.read(gridProvider(index));
+  AppTab get currentTab => ref.read(tabProvider);
 
   @override
   FutureOr<void> onMount() {
@@ -48,15 +49,10 @@ class GridBlockComponent extends RectangleComponent
 
     listen(gridProvider(index), (_, GridBlock? next) {
       if (next != null) {
-        // this.setColor(Colors.red);
-        text!.text = next.height.toString();
-
         if (next.isPaintedOver) {
-          var color = ColorHelper.heightToColor(thisBlock.height);
-          color = Color.alphaBlend(Colors.red.withOpacity(0.2), color);
-          this.setColor(color);
+          reloadCell(currentTab);
         } else {
-          this.setColor(
+          setColor(
             ColorHelper.heightToColor(thisBlock.height),
           );
           // move cell to bottom
@@ -65,19 +61,23 @@ class GridBlockComponent extends RectangleComponent
             parent?.remove(hover!);
             hover = null;
           }
+
+          reloadCell(currentTab);
         }
 
         if (next.isHovered) {
           if (hover == null) {
             hover = RectangleComponent(
               position: position + Vector2.all(cellSize() / 2),
-              size: Vector2(width * 1.1, height * 1.1),
+              size: Vector2(width * 1.13, height * 1.13),
               anchor: Anchor.center,
               priority: 50,
             )..setColor(Colors.red);
             parent?.add(hover!);
             // move cell to top
             priority = 80;
+
+            reloadCell(currentTab);
           }
         } else {
           setColor(
@@ -89,6 +89,8 @@ class GridBlockComponent extends RectangleComponent
             parent?.remove(hover!);
             hover = null;
           }
+
+          reloadCell(currentTab);
         }
       }
     });
@@ -98,14 +100,32 @@ class GridBlockComponent extends RectangleComponent
     });
   }
 
+  void updateForegroundColor() {
+    text?.textRenderer = TextPaint(
+      style: TextStyle(
+        color: ColorHelper.blockTextColor(thisBlock.height),
+        fontSize: 25,
+        fontWeight: FontWeight.w500,
+      ),
+    );
+  }
+
   void reloadCell(AppTab activeTab) {
+    updateForegroundColor();
     if (activeTab == AppTab.heights) {
       text!.text = thisBlock.height.toString();
     } else {
       text!.text = thisBlock.prefab;
     }
 
-    setColor(ColorHelper.heightToColor(thisBlock.height));
+    if (ref.read(gridProvider(index)).isPaintedOver) {
+      var color = ColorHelper.heightToColor(thisBlock.height);
+      color = Color.alphaBlend(Colors.red.withOpacity(0.2), color);
+      setColor(color);
+    } else {
+      setColor(ColorHelper.heightToColor(thisBlock.height));
+    }
+
     text?.textRenderer = TextPaint(
       style: TextStyle(
         color: ColorHelper.blockTextColor(thisBlock.height),
