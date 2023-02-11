@@ -1,7 +1,5 @@
 import 'package:cgef/helpers/color_helper.dart';
-import 'package:cgef/helpers/parsing_helper.dart';
 import 'package:cgef/models/enums.dart';
-import 'package:cgef/models/grid_block.dart';
 import 'package:cgef/providers/app_provider.dart';
 import 'package:cgef/providers/grid_provider.dart';
 import 'package:flutter/material.dart';

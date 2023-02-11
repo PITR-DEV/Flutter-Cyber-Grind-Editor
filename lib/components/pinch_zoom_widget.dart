@@ -6,12 +6,12 @@ class PinchZoom extends StatefulWidget {
   final bool zoomEnabled;
   final Function? onZoomStart, onZoomEnd;
 
-  PinchZoom(
-      {required this.child,
+  const PinchZoom(
+      {Key? key, required this.child,
       this.maxScale = 3.0,
       this.zoomEnabled = true,
       this.onZoomStart,
-      this.onZoomEnd});
+      this.onZoomEnd}) : super(key: key);
 
   @override
   _PinchZoomState createState() => _PinchZoomState();
@@ -27,7 +27,6 @@ class _PinchZoomState extends State<PinchZoom>
       height: double.maxFinite,
       width: double.maxFinite,
       child: InteractiveViewer(
-        child: widget.child,
         scaleEnabled: widget.zoomEnabled,
         maxScale: widget.maxScale,
         panEnabled: false,
@@ -39,6 +38,7 @@ class _PinchZoomState extends State<PinchZoom>
               }
             : null,
         transformationController: _transformationController,
+        child: widget.child,
       ),
     );
   }

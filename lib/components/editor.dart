@@ -1,28 +1,24 @@
 import 'dart:io';
 
 import 'package:cgef/helpers/grid_helper.dart';
-import 'package:cgef/providers/app_provider.dart';
 import 'package:cgef/components/exception_dialog.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:cgef/helpers/parsing_helper.dart';
-import 'package:cgef/models/enums.dart';
 import 'package:cgef/components/arena_grid.dart';
-import 'package:cgef/components/input/tab_button.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:layout/layout.dart';
 import 'package:path_provider/path_provider.dart';
 
-class EditorScreen extends ConsumerStatefulWidget {
-  const EditorScreen({Key? key}) : super(key: key);
+class Editor extends ConsumerStatefulWidget {
+  const Editor({Key? key}) : super(key: key);
 
   @override
   createState() => _EditorScreenState();
 }
 
-class _EditorScreenState extends ConsumerState<EditorScreen> {
+class _EditorScreenState extends ConsumerState<Editor> {
   String _getExportableString() {
     var grid = getGrid(ComponentRef(ref));
     var exportableString = ParsingHelper().stringifyPattern(grid);
@@ -100,7 +96,7 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
         }
       }
 
-      print('Setting default filename to ' + (outputPath ?? 'null'));
+      print('Setting default filename to ${outputPath ?? 'null'}');
 
       outputPath = await FilePicker.platform.saveFile(
         dialogTitle: 'Export your pattern:',
@@ -110,7 +106,7 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
         type: FileType.custom,
       );
 
-      print('User selected ' + (outputPath ?? 'null'));
+      print('User selected ${outputPath ?? 'null'}');
 
       if (outputPath == null) return false;
 
@@ -128,32 +124,8 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final gridCentered = context.breakpoint > LayoutBreakpoint.xs &&
-        context.breakpoint > LayoutBreakpoint.sm;
-
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size(0, 52),
-        child: Center(
-          child: Margin(
-            margin: const EdgeInsets.only(bottom: 12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [],
-            ),
-          ),
-        ),
-      ),
-      body: gridCentered
-          ? const Center(
-              child: ArenaGrid(
-                key: Key('ArenaGrid'),
-              ),
-            )
-          : const ArenaGrid(
-              key: Key('ArenaGrid'),
-            ),
+    return const ArenaGrid(
+      key: Key('ArenaGrid'),
     );
   }
 }

@@ -13,7 +13,7 @@ class SettingsPage extends ConsumerWidget {
       ),
       body: Center(
         child: SizedBox(
-          width: 460,
+          width: 480,
           child: ListView(children: [
             ListTile(
               title: const Text('Black Background'),
@@ -37,6 +37,18 @@ class SettingsPage extends ConsumerWidget {
                 },
               ),
               leading: const Icon(Icons.arrow_back),
+            ),
+            ListTile(
+              title: const Text('Brush Tint'),
+              subtitle: const Text(
+                  'Indicate painted-over cells with a background tint'),
+              trailing: Switch(
+                value: ref.watch(Preferences.brushTintEnabled),
+                onChanged: (value) {
+                  ref.read(Preferences.brushTintEnabled.notifier).state = value;
+                },
+              ),
+              leading: const Icon(Icons.brush),
             ),
             const Divider(
               thickness: 1,

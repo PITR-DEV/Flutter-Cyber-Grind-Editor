@@ -2,11 +2,10 @@ import 'package:cgef/components/input/tab_button.dart';
 import 'package:cgef/models/enums.dart';
 import 'package:cgef/providers/app_provider.dart';
 import 'package:cgef/providers/grid_provider.dart';
-import 'package:cgef/providers/pref_provider.dart';
 import 'package:cgef/components/prefab_selector.dart';
 import 'package:cgef/components/tool_options.dart';
 import 'package:cgef/components/toolbox.dart';
-import 'package:cgef/screens/editor_screen.dart';
+import 'package:cgef/components/editor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,16 +32,6 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
   void initState() {
     super.initState();
     _focusNode.requestFocus();
-    // List<PlatformMenuItem> menus = <PlatformMenuItem>[
-    //   PlatformMenuItem(label: 'File'),
-    // ];
-    // WidgetsBinding.instance.platformMenuDelegate.setMenus(menus);
-    // ShortcutRegistry.of(context).addAll(
-    //   <ShortcutActivator, Intent>{
-    //     SingleActivator(LogicalKeyboardKey.keyN, control: true):
-    //         const ActivateIntent(),
-    //   },
-    // );
   }
 
   void _handleKeyEvent(RawKeyEvent event) {
@@ -52,10 +41,11 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
   }
 
   Widget collapsedDrawer() {
-    return Column(
+    return ListView(
       children: [
-        Toolbox(),
-        ToolOptions(),
+        const Toolbox(),
+        Divider(),
+        secondaryDrawer(),
       ],
     );
   }
@@ -98,128 +88,189 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
     );
   }
 
+  Widget secondaryDrawer() {
+    return ref.watch(tabProvider) == AppTab.heights
+        ? const ToolOptions(key: Key('toolOptions'))
+        : const PrefabSelector(key: Key('prefabSelector'));
+  }
+
   @override
   Widget build(BuildContext context) {
     final mobileLayout = context.breakpoint <= LayoutBreakpoint.xs;
     final compactLayout = context.breakpoint <= LayoutBreakpoint.sm;
+    final height = MediaQuery.of(context).size.height;
 
     return Scaffold(
       appBar: PreferredSize(
-          preferredSize: const Size(0, 48),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                  child: MenuBar(children: [
-                const MenuItemButton(
-                  child: Text('cgef'),
+        preferredSize: const Size(0, 48),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: MenuBar(
+                style: MenuStyle(
+                  shadowColor: MaterialStateProperty.all(Colors.transparent),
+                  backgroundColor: MaterialStateProperty.all(
+                    Theme.of(context).colorScheme.surface,
+                  ),
+                  side: MaterialStateProperty.all(
+                    BorderSide(
+                      color:
+                          Theme.of(context).colorScheme.outline.withAlpha(60),
+                    ),
+                  ),
                 ),
-                SubmenuButton(
-                  menuChildren: [
-                    SizedBox(
-                      width: 280,
-                      child: MenuItemButton(
-                        shortcut: const SingleActivator(
-                          LogicalKeyboardKey.keyN,
-                          control: true,
+                children: [
+                  const MenuItemButton(
+                    child: Text('cgef'),
+                  ),
+                  SubmenuButton(
+                    menuChildren: [
+                      SizedBox(
+                        width: 280,
+                        child: MenuItemButton(
+                          shortcut: const SingleActivator(
+                            LogicalKeyboardKey.keyN,
+                            control: true,
+                          ),
+                          onPressed: () {
+                            newPattern(ref);
+                          },
+                          leadingIcon: const Icon(Icons.clear_all),
+                          child: const Text('New'),
                         ),
-                        onPressed: () {
-                          newPattern(ref);
-                        },
-                        child: const Text('New'),
                       ),
-                    ),
-                    SizedBox(
-                      width: 280,
-                      child: MenuItemButton(
-                        shortcut: const SingleActivator(
-                          LogicalKeyboardKey.keyS,
-                          control: true,
+                      SizedBox(
+                        width: 280,
+                        child: MenuItemButton(
+                          shortcut: const SingleActivator(
+                            LogicalKeyboardKey.keyS,
+                            control: true,
+                          ),
+                          onPressed: () {
+                            // ref.read(gridProvider.notifier).newGrid();
+                          },
+                          leadingIcon: const Icon(Icons.save),
+                          child: const Text('Save'),
                         ),
-                        onPressed: () {
-                          // ref.read(gridProvider.notifier).newGrid();
-                        },
-                        child: const Text('Save'),
                       ),
-                    ),
-                    SizedBox(
-                      width: 280,
-                      child: MenuItemButton(
-                        shortcut: const SingleActivator(
-                          LogicalKeyboardKey.keyS,
-                          control: true,
-                          shift: true,
+                      SizedBox(
+                        width: 280,
+                        child: MenuItemButton(
+                          shortcut: const SingleActivator(
+                            LogicalKeyboardKey.keyS,
+                            control: true,
+                            shift: true,
+                          ),
+                          onPressed: () {
+                            // ref.read(gridProvider.notifier).newGrid();
+                          },
+                          leadingIcon: const Icon(Icons.save_alt),
+                          child: const Text('Save As'),
                         ),
-                        onPressed: () {
-                          // ref.read(gridProvider.notifier).newGrid();
-                        },
-                        child: const Text('Save As'),
                       ),
-                    ),
-                    const Divider(),
-                    SizedBox(
-                      width: 280,
-                      child: MenuItemButton(
-                        shortcut: const SingleActivator(
-                          LogicalKeyboardKey.escape,
+                      const Divider(),
+                      SizedBox(
+                        width: 280,
+                        child: MenuItemButton(
+                          shortcut: const SingleActivator(
+                            LogicalKeyboardKey.escape,
+                          ),
+                          leadingIcon: const Icon(Icons.exit_to_app),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Main Menu'),
                         ),
-                        leadingIcon: const Icon(Icons.arrow_back),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: const Text('Main Menu'),
                       ),
-                    ),
-                  ],
-                  child: const Text('File'),
-                ),
-                MenuItemButton(
-                  child: const Text('Settings'),
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/settings');
-                  },
-                )
-
-                // Padding(
-                //   padding: const EdgeInsets.symmetric(horizontal: 4),
-                //   child: IconButton(
-                //     icon: const Icon(Icons.settings),
-                //     onPressed: () {
-                //       Navigator.pushNamed(context, '/settings');
-                //     },
-                //   ),
-                // ),
-                // const SizedBox(
-                //   width: 4,
-                // ),
-              ])),
-            ],
-          )),
+                    ],
+                    child: const Text('File'),
+                  ),
+                  SubmenuButton(
+                    menuChildren: [
+                      SizedBox(
+                        width: 280,
+                        child: MenuItemButton(
+                          shortcut: const SingleActivator(
+                            LogicalKeyboardKey.keyZ,
+                            control: true,
+                          ),
+                          leadingIcon: const Icon(Icons.undo),
+                          onPressed: () {
+                            newPattern(ref);
+                          },
+                          child: const Text('Undo'),
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 280,
+                        child: MenuItemButton(
+                          shortcut: SingleActivator(
+                            LogicalKeyboardKey.keyY,
+                            control: true,
+                          ),
+                          leadingIcon: Icon(Icons.redo),
+                          // onPressed: () {
+                          //   // ref.read(gridProvider.notifier).newGrid();
+                          // },
+                          child: Text('Redo'),
+                        ),
+                      ),
+                    ],
+                    child: const Text('Edit'),
+                  ),
+                  MenuItemButton(
+                    child: const Text('Settings'),
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/settings');
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
       body: Row(
         children: [
           if (!mobileLayout && compactLayout)
-            SizedBox(width: 200, child: collapsedDrawer()),
+            SizedBox(width: 220, child: collapsedDrawer()),
           if (!compactLayout)
             const SizedBox(
-              width: 200,
+              width: 220,
               child: Toolbox(),
             ),
           Expanded(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                if (!mobileLayout) SizedBox(height: 55, child: modeTabs()),
+                if (!mobileLayout)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: SizedBox(height: 55, child: modeTabs()),
+                  ),
                 const Expanded(
-                  child: EditorScreen(
-                    key: ValueKey('editor'),
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: Editor(
+                        key: ValueKey('editor'),
+                      ),
+                    ),
                   ),
                 ),
+                const SizedBox(
+                  height: 8,
+                )
               ],
             ),
           ),
           if (!compactLayout)
-            const SizedBox(
-              width: 200,
-              child: ToolOptions(),
+            SizedBox(
+              width: 220,
+              child: secondaryDrawer(),
             ),
         ],
       ),
@@ -227,9 +278,6 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
     // OLD LAYOUT!
 
     var rowChildren = <Widget>[];
-    var secondaryDrawer = ref.watch(tabProvider) == AppTab.heights
-        ? const ToolOptions(key: Key('toolOptions'))
-        : const PrefabSelector(key: Key('prefabSelector'));
     Widget finalLayout;
 
     if (context.breakpoint > LayoutBreakpoint.xs) {
@@ -242,9 +290,9 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
           // Expanded(
           // child: widget.content,
           // ),
-          SizedBox(
+          const SizedBox(
             width: 200,
-            child: secondaryDrawer,
+            // child: secondaryDrawer,
           ),
         ];
       } else {
@@ -252,9 +300,9 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
           SizedBox(
             width: 200,
             child: ListView(
-              children: [
-                const Toolbox(),
-                secondaryDrawer,
+              children: const [
+                Toolbox(),
+                // secondaryDrawer,
               ],
             ),
           ),
@@ -283,9 +331,9 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
       // body: widget.content,
       drawer: Drawer(
         child: ListView(
-          children: [
-            const Toolbox(),
-            secondaryDrawer,
+          children: const [
+            Toolbox(),
+            // secondaryDrawer,
           ],
         ),
       ),

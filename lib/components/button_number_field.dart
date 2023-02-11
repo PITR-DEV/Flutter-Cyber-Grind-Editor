@@ -1,10 +1,7 @@
-import 'package:cgef/models/enums.dart';
-import 'package:cgef/providers/app_provider.dart';
 import 'package:cgef/components/input/fat_button.dart';
 import 'package:cgef/components/input/fat_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:layout/layout.dart';
 
 class ButtonNumberField extends ConsumerStatefulWidget {
   ButtonNumberField({
@@ -30,6 +27,8 @@ class ButtonNumberField extends ConsumerStatefulWidget {
   @override
   createState() => _ButtonNumberField();
 }
+
+const double flowDownHeight = 42;
 
 class _ButtonNumberField extends ConsumerState<ButtonNumberField> {
   late TextEditingController controller;
@@ -70,7 +69,7 @@ class _ButtonNumberField extends ConsumerState<ButtonNumberField> {
               children: [
                 Container(
                   width: 40,
-                  height: 66,
+                  height: flowDownHeight,
                   margin: const EdgeInsets.only(right: 1),
                   child: FatButton(
                     onPressed: () {
@@ -104,7 +103,7 @@ class _ButtonNumberField extends ConsumerState<ButtonNumberField> {
                 ),
                 Container(
                   width: 40,
-                  height: 66,
+                  height: flowDownHeight,
                   margin: const EdgeInsets.only(left: 1),
                   child: FatButton(
                     onPressed: () {

@@ -1,11 +1,9 @@
-import 'dart:async';
-import 'dart:ui';
 
 import 'package:cgef/flame/cell.dart';
 import 'package:cgef/helpers/parsing_helper.dart';
+import 'package:cgef/providers/app_provider.dart';
 import 'package:cgef/providers/grid_provider.dart';
 import 'package:flame/components.dart';
-import 'package:flame/experimental.dart';
 import 'package:flame/game.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +26,8 @@ class GridGame extends FlameGame
     final y = (offset.dy / size.y * ParsingHelper.arenaSize).floor();
     final index = y * ParsingHelper.arenaSize + x;
     if (index == hoveredIndex) return;
+    cancelClick(ref);
+    ref.read(hoveredCellIndexProvider.notifier).state = index;
     hoverOverBlock(ref, index);
     hoveredIndex = index;
   }

@@ -6,11 +6,11 @@ import 'package:cgef/models/enums.dart';
 import 'package:cgef/models/grid_block.dart';
 import 'package:cgef/providers/app_provider.dart';
 import 'package:cgef/providers/grid_provider.dart';
-import 'package:fast_immutable_collections/fast_immutable_collections.dart';
+import 'package:cgef/providers/pref_provider.dart';
 import 'package:flame/components.dart';
-import 'package:flame/events.dart';
-import 'package:flame/game.dart';
+import 'package:flame/effects.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
+import 'package:flame_svg/flame_svg.dart';
 import 'package:flutter/material.dart';
 
 class GridBlockComponent extends RectangleComponent
@@ -20,15 +20,50 @@ class GridBlockComponent extends RectangleComponent
 
   TextComponent? text;
   RectangleComponent? hover;
+  SvgComponent? stairsIcon;
+
+  GridBlock? lastBlockData;
+
+  TextStyle textStyle = const TextStyle(
+    fontSize: 25,
+    fontWeight: FontWeight.w500,
+  );
+
+  static Svg? stairsSvg;
+  static bool initialized = false;
 
   GridBlock get thisBlock => ref.read(gridProvider(index));
   AppTab get currentTab => ref.read(tabProvider);
 
   @override
+  void onRemove() {
+    if (hover != null) {
+      parent?.remove(hover!);
+      hover = null;
+    }
+    if (text != null) {
+      parent?.remove(text!);
+      text = null;
+    }
+    if (stairsIcon != null) {
+      parent?.remove(stairsIcon!);
+      stairsIcon = null;
+    }
+    super.onRemove();
+  }
+
+  @override
   FutureOr<void> onMount() {
     super.onMount();
 
-    final cellMulti = 0.98;
+    if (!initialized && stairsIcon == null) {
+      Svg.load('Stairs_Map_Preview.svg').then((value) {
+        stairsSvg = value;
+      });
+      initialized = true;
+    }
+
+    const cellMulti = 0.98;
     width = cellSize() * cellMulti;
     height = cellSize() * cellMulti;
 
@@ -42,6 +77,7 @@ class GridBlockComponent extends RectangleComponent
         size: Vector2.all(10),
         scale: Vector2.all(0.6),
         priority: 100);
+    // print('cell $index mounted');
     reloadCell(ref.read(tabProvider));
     text!.anchor = Anchor.center;
     text!.position = Vector2(width / 2, height / 2);
@@ -49,6 +85,13 @@ class GridBlockComponent extends RectangleComponent
 
     listen(gridProvider(index), (_, GridBlock? next) {
       if (next != null) {
+        if (lastBlockData == null) {
+          lastBlockData = next;
+        } else if (lastBlockData == next) {
+          return;
+        }
+        lastBlockData = next;
+
         if (next.isPaintedOver) {
           reloadCell(currentTab);
         } else {
@@ -66,69 +109,113 @@ class GridBlockComponent extends RectangleComponent
         }
 
         if (next.isHovered) {
-          if (hover == null) {
-            hover = RectangleComponent(
+          if (hover == null || hover?.parent == null) {
+            hover ??= RectangleComponent(
               position: position + Vector2.all(cellSize() / 2),
               size: Vector2(width * 1.13, height * 1.13),
               anchor: Anchor.center,
               priority: 50,
             )..setColor(Colors.red);
-            parent?.add(hover!);
             // move cell to top
             priority = 80;
-
+            parent?.add(hover!);
             reloadCell(currentTab);
           }
         } else {
-          setColor(
-            ColorHelper.heightToColor(thisBlock.height),
-          );
-          // move cell to bottom
-          priority = 0;
           if (hover != null) {
+            setColor(
+              ColorHelper.heightToColor(thisBlock.height),
+            );
+            // move cell to bottom
+            priority = 0;
             parent?.remove(hover!);
-            hover = null;
+            reloadCell(currentTab);
           }
-
-          reloadCell(currentTab);
         }
       }
     });
 
     listen(tabProvider, (_, AppTab next) {
+      print('tab changed');
       reloadCell(next);
     });
   }
 
   void updateForegroundColor() {
     text?.textRenderer = TextPaint(
-      style: TextStyle(
+      style: textStyle.copyWith(
         color: ColorHelper.blockTextColor(thisBlock.height),
-        fontSize: 25,
-        fontWeight: FontWeight.w500,
       ),
     );
   }
 
   void reloadCell(AppTab activeTab) {
     updateForegroundColor();
-    if (activeTab == AppTab.heights) {
-      text!.text = thisBlock.height.toString();
-    } else {
-      text!.text = thisBlock.prefab;
+
+    if (ref.read(Preferences.debugOverlay)) {
+      ref.read(debugCellsUpdatedProvider.notifier).state++;
     }
 
-    if (ref.read(gridProvider(index)).isPaintedOver) {
+    var desiredText = '';
+    if (activeTab == AppTab.heights) {
+      desiredText = thisBlock.height.toString();
+    } else {
+      desiredText = thisBlock.prefab;
+    }
+
+    if (text?.text != desiredText) {
+      text?.text = desiredText;
+    }
+
+    final enableBackgroundTint = ref.read(Preferences.brushTintEnabled);
+    final isPaintedOver = thisBlock.isPaintedOver;
+    final isSelectedPoint = ref.read(selectedGridBlockProvider) == index;
+    final isInPrefabMode = ref.read(tabProvider) == AppTab.prefabs;
+
+    if ((isPaintedOver || isSelectedPoint) && enableBackgroundTint) {
       var color = ColorHelper.heightToColor(thisBlock.height);
       color = Color.alphaBlend(Colors.red.withOpacity(0.2), color);
       setColor(color);
     } else {
-      setColor(ColorHelper.heightToColor(thisBlock.height));
+      var color = ColorHelper.heightToColor(thisBlock.height);
+      setColor(color);
     }
 
+    if (thisBlock.prefab == 's') {
+      if (stairsIcon == null) {
+        stairsIcon = SvgComponent(
+          svg: stairsSvg!,
+          size: Vector2.all(cellSize() * 0.3),
+          anchor: Anchor.bottomLeft,
+          position: Vector2(3, height - 3),
+        )..add(
+            ColorEffect(
+              ColorHelper.blockOverlayColor(thisBlock.height),
+              const Offset(
+                1,
+                1,
+              ),
+              EffectController(
+                duration: 0,
+              ),
+            ),
+          );
+        ;
+        add(stairsIcon!);
+      }
+    } else {
+      if (stairsIcon != null) {
+        remove(stairsIcon!);
+        stairsIcon = null;
+      }
+    }
+    var textColor = ColorHelper.blockTextColor(thisBlock.height);
+    if (isInPrefabMode && thisBlock.prefab == '0') {
+      textColor = textColor.withAlpha(10);
+    }
     text?.textRenderer = TextPaint(
       style: TextStyle(
-        color: ColorHelper.blockTextColor(thisBlock.height),
+        color: textColor,
         fontSize: 25,
         fontWeight: FontWeight.w500,
       ),

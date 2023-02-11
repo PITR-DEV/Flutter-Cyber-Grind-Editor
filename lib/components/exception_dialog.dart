@@ -14,7 +14,7 @@ void spawnExceptionDialog(BuildContext context, String error) {
           error,
           maxLines: 6,
         ),
-        backgroundColor: Color.fromARGB(255, 61, 37, 35),
+        backgroundColor: const Color.fromARGB(255, 61, 37, 35),
         actions: [
           TextButton(
             onPressed: () {

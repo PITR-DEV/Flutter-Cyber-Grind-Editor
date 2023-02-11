@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:layout/layout.dart';
 
 class TabButton extends StatelessWidget {
   const TabButton({
@@ -20,23 +19,43 @@ class TabButton extends StatelessWidget {
   final bool? expandVertically;
 
   Widget button() {
-    return OutlinedButton.icon(
-      onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        foregroundColor: active ? Colors.black : Colors.white,
-        backgroundColor: active ? Colors.white : Colors.transparent,
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 0),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(12),
-            bottomRight: Radius.circular(12),
-          ),
-        ),
-        side: const BorderSide(
-          color: Colors.white,
-          width: 3,
+    final buttonStyle = OutlinedButton.styleFrom(
+      foregroundColor: active ? Colors.black : Colors.white,
+      backgroundColor: active ? Colors.white : Colors.transparent,
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 0),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(12),
+          bottomRight: Radius.circular(12),
         ),
       ),
+      side: const BorderSide(
+        color: Colors.white,
+        width: 3,
+      ),
+    ).copyWith(
+      side: MaterialStateProperty.resolveWith((states) {
+        if (states.contains(MaterialState.hovered)) {
+          return BorderSide(
+            color: Colors.white.withOpacity(0.6),
+            width: 3,
+          );
+        }
+        return const BorderSide(
+          color: Colors.white,
+          width: 3,
+        );
+      }),
+      backgroundColor: MaterialStateProperty.resolveWith((states) {
+        if (states.contains(MaterialState.hovered)) {
+          return active ? Colors.white.withOpacity(0.8) : Colors.transparent;
+        }
+        return active ? Colors.white : Colors.transparent;
+      }),
+    );
+    return OutlinedButton.icon(
+      onPressed: onPressed,
+      style: buttonStyle,
       icon: collapsedIcon!,
       label: Text(
         text,
@@ -47,7 +66,8 @@ class TabButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return AnimatedPadding(
+      duration: const Duration(milliseconds: 200),
       padding: const EdgeInsets.symmetric(horizontal: 4).copyWith(
         bottom: expandVertically == null
             ? 0

@@ -1,9 +1,6 @@
 import 'package:cgef/components/debug_overlay.dart';
-import 'package:cgef/providers/app_provider.dart';
-import 'package:cgef/providers/grid_provider.dart';
 import 'package:cgef/providers/pref_provider.dart';
 import 'package:cgef/screens/main_layout.dart';
-import 'package:cgef/screens/editor_screen.dart';
 import 'package:cgef/screens/home_screen.dart';
 import 'package:cgef/screens/settings.dart';
 import 'package:cgef/components/quit_confirmation.dart';

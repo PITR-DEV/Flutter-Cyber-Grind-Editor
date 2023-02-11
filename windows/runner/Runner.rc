@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "dev.pitr" "\0"
-            VALUE "FileDescription", "ultrakill_cloud_app" "\0"
+            VALUE "FileDescription", "cgef" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "ultrakill_cloud_app" "\0"
+            VALUE "InternalName", "cgef" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2023 dev.pitr. All rights reserved." "\0"
-            VALUE "OriginalFilename", "ultrakill_cloud_app.exe" "\0"
-            VALUE "ProductName", "ultrakill_cloud_app" "\0"
+            VALUE "OriginalFilename", "cgef.exe" "\0"
+            VALUE "ProductName", "cgef" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

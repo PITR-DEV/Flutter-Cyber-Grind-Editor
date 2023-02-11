@@ -70,9 +70,10 @@ List<int> computeFill(ComponentRef ref, int x1, int y1, int x2, int y2) {
   final relevantBlocks = <GridBlock>[];
   for (int x = x1; x <= x2; x++) {
     for (int y = y1; y <= y2; y++) {
-      relevantBlocks.add(getGridBlockNotifier(ref, x, y).state);
+      relevantBlocks.add(getGridBlockNotifier(ref, y, x).state);
     }
   }
+  relevantBlocks.removeDuplicates();
   return relevantBlocks.map((e) => e.index).toList();
 }
 
@@ -91,14 +92,21 @@ List<int> computeRectOutline(ComponentRef ref, int x1, int y1, int x2, int y2) {
 
   final relevantBlocks = <GridBlock>[];
   for (int x = x1; x <= x2; x++) {
-    relevantBlocks.add(getGridBlockNotifier(ref, x, y1).state);
-    relevantBlocks.add(getGridBlockNotifier(ref, x, y2).state);
+    relevantBlocks.add(getGridBlockNotifier(ref, y1, x).state);
+    relevantBlocks.add(getGridBlockNotifier(ref, y2, x).state);
   }
   for (int y = y1; y <= y2; y++) {
-    relevantBlocks.add(getGridBlockNotifier(ref, x1, y).state);
-    relevantBlocks.add(getGridBlockNotifier(ref, x2, y).state);
+    relevantBlocks.add(getGridBlockNotifier(ref, y, x1).state);
+    relevantBlocks.add(getGridBlockNotifier(ref, y, x2).state);
   }
+
+  relevantBlocks.removeDuplicates();
   return relevantBlocks.map((e) => e.index).toList();
+}
+
+void toolChanged(ComponentRef ref) {
+  ref.read(paintedOverProvider.notifier).state = <int>[].lock;
+  ref.read(hoveredProvider.notifier).state = <int>[].lock;
 }
 
 void onClickBlock(ComponentRef ref, int index) {
@@ -117,7 +125,10 @@ void onClickBlock(ComponentRef ref, int index) {
         ref.read(selectedGridBlockProvider.notifier).state =
             index % ParsingHelper.arenaSize +
                 (index ~/ ParsingHelper.arenaSize) * ParsingHelper.arenaSize;
-        hoverOverBlock(ref, index);
+        // hoverOverBlock(ref, index);
+        final cellNotifier = ref.read(gridProvider(index).notifier);
+        cellNotifier.state =
+            cellNotifier.state.copyWith(isPaintedOver: true, isHovered: true);
       } else {
         computeFill(ref, x, y, toolSelected % ParsingHelper.arenaSize,
                 toolSelected ~/ ParsingHelper.arenaSize)
@@ -131,7 +142,10 @@ void onClickBlock(ComponentRef ref, int index) {
     case Tool.outlineRect:
       if (toolSelected == null) {
         ref.read(selectedGridBlockProvider.notifier).state = index;
-        hoverOverBlock(ref, index);
+        // hoverOverBlock(ref, index);
+        final cellNotifier = ref.read(gridProvider(index).notifier);
+        cellNotifier.state =
+            cellNotifier.state.copyWith(isPaintedOver: true, isHovered: true);
       } else {
         computeRectOutline(ref, x, y, toolSelected % ParsingHelper.arenaSize,
                 toolSelected ~/ ParsingHelper.arenaSize)
@@ -211,7 +225,9 @@ void hoverOverBlock(ComponentRef ref, int index) {
   final currentTool = ref.read(toolProvider);
   final isPainting = ref.read(isPaintingProvider);
 
-  if (currentTool != Tool.brush || !isPainting) resetHover(ref);
+  if (currentTool == Tool.point ||
+      (currentTool == Tool.brush && !isPainting) ||
+      (currentTool != Tool.brush && selectedBlock == null)) resetHover(ref);
   setHover(ref, index, heavy: currentTool == Tool.brush && isPainting);
   switch (currentTool) {
     case Tool.brush:
@@ -243,13 +259,54 @@ void hoverOverBlock(ComponentRef ref, int index) {
             selectedBlock ~/ ParsingHelper.arenaSize);
       }
 
+      for (var index in ref
+          .read(hoveredProvider)
+          .where((element) => !relevantBlocks.contains(element))) {
+        final cellNotifier = ref.read(gridProvider(index).notifier);
+        cellNotifier.state =
+            cellNotifier.state.copyWith(isHovered: false, isPaintedOver: false);
+        ref.read(hoveredProvider.notifier).state =
+            ref.read(hoveredProvider).remove(index);
+      }
+
       for (var index in relevantBlocks) {
         setHover(ref, index, heavy: true);
       }
+
       break;
     case Tool.point:
       break;
   }
+}
+
+void handleMouseDown(ComponentRef ref) {
+  final currentTool = ref.read(toolProvider);
+  final isPainting = ref.read(isPaintingProvider);
+
+  if (currentTool == Tool.brush && !isPainting) {
+    paintStart(ref);
+  } else if (currentTool != Tool.brush) {
+    ref.read(isClickPendingProvider.notifier).state = true;
+  }
+}
+
+void handleMouseUp(ComponentRef ref) {
+  final currentTool = ref.read(toolProvider);
+  final isPainting = ref.read(isPaintingProvider);
+  final selectedBlock = ref.read(hoveredCellIndexProvider);
+
+  if (currentTool == Tool.brush && isPainting) {
+    paintStop(ref);
+  } else if (currentTool != Tool.brush) {
+    if (selectedBlock != null && ref.read(isClickPendingProvider)) {
+      // affectBlock(ref, selectedBlock);
+      onClickBlock(ref, selectedBlock);
+    }
+  }
+}
+
+void cancelClick(ComponentRef ref) {
+  ref.read(isClickPendingProvider.notifier).state = false;
 }
 
 void paintStart(ComponentRef ref) {
@@ -315,6 +372,7 @@ void setHover(ComponentRef ref, int index, {bool heavy = false}) {
   }
 
   final hovered = ref.read(hoveredProvider);
+  if (hovered.contains(index)) return;
   ref.read(hoveredProvider.notifier).state =
       ref.read(hoveredProvider).add(x + y * ParsingHelper.arenaSize);
   final cellNotifier = ref.read(gridProvider(index).notifier);

@@ -1,9 +1,7 @@
 import 'package:cgef/flame/grid.dart';
-import 'package:cgef/helpers/grid_helper.dart';
 import 'package:cgef/helpers/parsing_helper.dart';
 import 'package:cgef/providers/grid_provider.dart';
 import 'package:cgef/components/input/grid_block_button.dart';
-import 'package:cgef/components/pinch_zoom_widget.dart';
 import 'package:flame/game.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
@@ -40,10 +38,18 @@ class _ArenaGridState extends ConsumerState<ArenaGrid> {
         }
       },
       child: Listener(
-        onPointerDown: (event) => paintStart(cmpRef),
-        onPointerUp: (event) => paintStop(cmpRef),
-        onPointerMove: (event) =>
-            game.updateCursorPosition(event.localPosition),
+        onPointerDown: (event) => handleMouseDown(cmpRef),
+        onPointerUp: (event) => handleMouseUp(cmpRef),
+        onPointerMove: (event) {
+          // discard if outside of the grid
+          if (event.localPosition.dx < 0 ||
+              event.localPosition.dy < 0 ||
+              event.localPosition.dx > MediaQuery.of(context).size.width ||
+              event.localPosition.dy > MediaQuery.of(context).size.height) {
+            return;
+          }
+          game.updateCursorPosition(event.localPosition);
+        },
         onPointerHover: (event) =>
             game.updateCursorPosition(event.localPosition),
         child: GameWidget(
@@ -60,17 +66,6 @@ class _ArenaGridState extends ConsumerState<ArenaGrid> {
 
     final grid = _buildArenaGrid(context)!;
 
-    return Column(
-      children: [
-        Expanded(
-          child: Center(
-            child: AspectRatio(aspectRatio: 1, child: grid),
-          ),
-        ),
-        const SizedBox(
-          height: 12,
-        )
-      ],
-    );
+    return grid;
   }
 }
