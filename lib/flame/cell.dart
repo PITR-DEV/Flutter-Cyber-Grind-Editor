@@ -86,9 +86,14 @@ class GridBlockComponent extends RectangleComponent
     text!.position = Vector2(width / 2, height / 2);
     add(text!);
 
+    listen(isClickPendingProvider, (_, bool? next) {
+      if (next != null && ref.read(hoveredCellIndexProvider) == index) {
+        updateCellState();
+      }
+    });
+
     listen(cellStates(index), (_, CellState? next) {
       if (next == null) return;
-      // updateHover(next.isHovered, next.isPaintedOver);
       updateCellState();
     });
 
@@ -120,12 +125,17 @@ class GridBlockComponent extends RectangleComponent
           size: Vector2(width * 1.13, height * 1.13),
           anchor: Anchor.center,
           priority: 50,
-        )..setColor(Colors.red);
+        );
 
         // move cell to top
         priority = 80;
         parent?.add(hover!);
-        // reloadCell(currentTab);
+      }
+
+      if (ref.read(isClickPendingProvider)) {
+        hover!.setColor(const Color.fromARGB(255, 196, 31, 20));
+      } else {
+        hover!.setColor(Colors.red);
       }
     } else {
       if (hover != null) {
@@ -135,7 +145,6 @@ class GridBlockComponent extends RectangleComponent
         // move cell to bottom
         priority = 0;
         if (hover!.parent != null) hover!.parent!.remove(hover!);
-        // reloadCell(currentTab);
       }
     }
 

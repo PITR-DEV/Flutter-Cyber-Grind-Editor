@@ -363,8 +363,8 @@ void handleMouseUp(ComponentRef ref) {
     paintStop(ref);
   } else if (currentTool != Tool.brush) {
     if (selectedBlock != null && ref.read(isClickPendingProvider)) {
-      // affectBlock(ref, selectedBlock);
       onClickBlock(ref, selectedBlock);
+      ref.read(isClickPendingProvider.notifier).state = false;
     }
   }
 }

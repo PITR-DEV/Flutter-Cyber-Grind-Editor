@@ -42,13 +42,6 @@ class _ArenaGridState extends ConsumerState<ArenaGrid> {
         onPointerDown: (event) => handleMouseDown(cmpRef),
         onPointerUp: (event) => handleMouseUp(cmpRef),
         onPointerMove: (event) {
-          // discard if outside of the grid
-          if (event.localPosition.dx < 0 ||
-              event.localPosition.dy < 0 ||
-              event.localPosition.dx > MediaQuery.of(context).size.width ||
-              event.localPosition.dy > MediaQuery.of(context).size.height) {
-            return;
-          }
           game.updateCursorPosition(event.localPosition);
         },
         onPointerHover: (event) =>

@@ -25,10 +25,10 @@ class GridGame extends FlameGame
   void updateCursorPosition(Offset offset) {
     final size = gameRef.size;
     // make sure offset isn't less than 0 or greater than the size of the grid
-    if (offset.dx < 0 ||
-        offset.dy < 0 ||
-        offset.dx > size.x ||
-        offset.dy > size.y) {
+    if (offset.dx <= 0 ||
+        offset.dy <= 0 ||
+        offset.dx >= size.x ||
+        offset.dy >= size.y) {
       hoveredIndex = null;
       ref.read(hoveredCellIndexProvider.notifier).state = null;
       cancelClick(ref);
