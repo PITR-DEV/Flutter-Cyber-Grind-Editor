@@ -21,6 +21,7 @@ class GridBlockComponent extends RectangleComponent
   TextComponent? text;
   RectangleComponent? hover;
   SvgComponent? stairsIcon;
+  ColorEffect? overlayColorEffect;
 
   Cell? lastBlockData;
 
@@ -154,6 +155,60 @@ class GridBlockComponent extends RectangleComponent
     }
   }
 
+  void disposeOverlayColor() {
+    if (overlayColorEffect != null) {
+      if (overlayColorEffect!.parent != null) {
+        overlayColorEffect!.parent!.remove(overlayColorEffect!);
+      }
+      overlayColorEffect = null;
+    }
+  }
+
+  void updateStairs() {
+    if (thisBlock.prefab == 's') {
+      if (stairsIcon == null) {
+        if (overlayColorEffect != null) {
+          if (overlayColorEffect!.parent != null) {
+            overlayColorEffect!.parent!.remove(overlayColorEffect!);
+          }
+          overlayColorEffect = null;
+        }
+        overlayColorEffect = createOverlayColor();
+
+        stairsIcon = SvgComponent(
+          svg: stairsSvg!,
+          size: Vector2.all(cellSize() * 0.3),
+          anchor: Anchor.bottomLeft,
+          position: Vector2(3, height - 3),
+        )..add(overlayColorEffect!);
+        add(stairsIcon!);
+      } else {
+        disposeOverlayColor();
+        overlayColorEffect = createOverlayColor();
+        stairsIcon!.add(overlayColorEffect!);
+      }
+    } else {
+      disposeOverlayColor();
+
+      if (stairsIcon != null) {
+        if (stairsIcon!.parent != null) {
+          stairsIcon!.parent!.remove(stairsIcon!);
+        }
+        stairsIcon = null;
+      }
+    }
+  }
+
+  ColorEffect createOverlayColor() {
+    return ColorEffect(
+      ColorHelper.blockOverlayColor(thisBlock.height),
+      const Offset(1, 1),
+      EffectController(
+        duration: 0,
+      ),
+    );
+  }
+
   void updateCell(AppTab activeTab) {
     updateForegroundColor();
 
@@ -174,34 +229,7 @@ class GridBlockComponent extends RectangleComponent
 
     final isInPrefabMode = ref.read(tabProvider) == AppTab.prefabs;
 
-    if (thisBlock.prefab == 's') {
-      if (stairsIcon == null) {
-        stairsIcon = SvgComponent(
-          svg: stairsSvg!,
-          size: Vector2.all(cellSize() * 0.3),
-          anchor: Anchor.bottomLeft,
-          position: Vector2(3, height - 3),
-        )..add(
-            ColorEffect(
-              ColorHelper.blockOverlayColor(thisBlock.height),
-              const Offset(
-                1,
-                1,
-              ),
-              EffectController(
-                duration: 0,
-              ),
-            ),
-          );
-
-        add(stairsIcon!);
-      }
-    } else {
-      if (stairsIcon != null) {
-        remove(stairsIcon!);
-        stairsIcon = null;
-      }
-    }
+    updateStairs();
     var textColor = ColorHelper.blockTextColor(thisBlock.height);
     if (isInPrefabMode && thisBlock.prefab == '0') {
       textColor = textColor.withAlpha(10);
