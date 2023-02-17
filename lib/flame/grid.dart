@@ -1,4 +1,3 @@
-
 import 'package:cgef/flame/cell.dart';
 import 'package:cgef/helpers/parsing_helper.dart';
 import 'package:cgef/providers/app_provider.dart';
@@ -19,8 +18,23 @@ class GridGame extends FlameGame
   int? hoveredIndex;
   bool clickCancelled = false;
 
+  void resetLocalHover() {
+    hoveredIndex = null;
+  }
+
   void updateCursorPosition(Offset offset) {
     final size = gameRef.size;
+    // make sure offset isn't less than 0 or greater than the size of the grid
+    if (offset.dx < 0 ||
+        offset.dy < 0 ||
+        offset.dx > size.x ||
+        offset.dy > size.y) {
+      hoveredIndex = null;
+      ref.read(hoveredCellIndexProvider.notifier).state = null;
+      cancelClick(ref);
+      return;
+    }
+
     // convert cursor x and y, into grid x and y and then into index
     final x = (offset.dx / size.x * ParsingHelper.arenaSize).floor();
     final y = (offset.dy / size.y * ParsingHelper.arenaSize).floor();

@@ -6,6 +6,7 @@ import 'package:cgef/components/prefab_selector.dart';
 import 'package:cgef/components/tool_options.dart';
 import 'package:cgef/components/toolbox.dart';
 import 'package:cgef/components/editor.dart';
+import 'package:cgef/providers/history_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -196,24 +197,30 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
                             control: true,
                           ),
                           leadingIcon: const Icon(Icons.undo),
-                          onPressed: () {
-                            newPattern(ref);
-                          },
-                          child: const Text('Undo'),
+                          onPressed: ref.watch(historyProvider).isNotEmpty
+                              ? () {
+                                  undo(ref);
+                                }
+                              : null,
+                          child: Text(
+                              'Undo ${ref.watch(historyProvider).isNotEmpty ? '(${ref.watch(historyProvider).length})' : ''}'),
                         ),
                       ),
-                      const SizedBox(
+                      SizedBox(
                         width: 280,
                         child: MenuItemButton(
-                          shortcut: SingleActivator(
+                          shortcut: const SingleActivator(
                             LogicalKeyboardKey.keyY,
                             control: true,
                           ),
-                          leadingIcon: Icon(Icons.redo),
-                          // onPressed: () {
-                          //   // ref.read(gridProvider.notifier).newGrid();
-                          // },
-                          child: Text('Redo'),
+                          leadingIcon: const Icon(Icons.redo),
+                          onPressed: ref.watch(redoHistoryProvider).isNotEmpty
+                              ? () {
+                                  redo(ref);
+                                }
+                              : null,
+                          child: Text(
+                              'Redo ${ref.watch(redoHistoryProvider).isNotEmpty ? '(${ref.watch(redoHistoryProvider).length})' : ''}'),
                         ),
                       ),
                     ],

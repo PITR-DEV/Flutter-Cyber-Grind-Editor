@@ -1,27 +1,48 @@
 import 'package:cgef/helpers/grid_helper.dart';
 import 'package:cgef/helpers/parsing_helper.dart';
 import 'package:cgef/models/grid_block.dart';
+import 'package:cgef/models/history_item.dart';
 import 'package:cgef/providers/app_provider.dart';
 import 'package:cgef/models/enums.dart';
+import 'package:cgef/providers/history_provider.dart';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final gridProvider = StateProvider.family<GridBlock, int>(
+final gridProvider = StateProvider.family<Cell, int>(
   (ref, index) {
-    return GridBlock(
+    return Cell(
       height: 0,
       prefab: '0',
       index: index,
+    );
+  },
+);
+
+final cellStates = StateProvider.family<CellState, int>(
+  (ref, index) {
+    return const CellState(
       isHovered: false,
       isPaintedOver: false,
     );
   },
 );
 
+void resetVolatileState(WidgetRef ref) {
+  ref.read(hoveredProvider.notifier).state = <int>[].lock;
+  ref.read(paintedOverProvider.notifier).state = <int>[].lock;
+  ref.read(isPaintingProvider.notifier).state = false;
+  for (int i = 0; i < ParsingHelper.arenaSize * ParsingHelper.arenaSize; i++) {
+    ref.read(cellStates(i).notifier).state = const CellState(
+      isHovered: false,
+      isPaintedOver: false,
+    );
+  }
+}
+
 final hoveredProvider = StateProvider((ref) => <int>[].lock);
 final paintedOverProvider = StateProvider((ref) => <int>[].lock);
-
+final paintDeltas = StateProvider((ref) => <Delta>[].lock);
 final isPaintingProvider = StateProvider((ref) => false);
 
 void newPattern(WidgetRef ref) {
@@ -32,16 +53,22 @@ void newPattern(WidgetRef ref) {
 void resetPattern(WidgetRef ref) {
   // Reset all state
   for (int i = 0; i < ParsingHelper.arenaSize * ParsingHelper.arenaSize; i++) {
-    ref.read(gridProvider(i).notifier).state = GridBlock(
+    ref.read(gridProvider(i).notifier).state = Cell(
       height: 0,
       prefab: '0',
       index: i,
+    );
+    ref.read(cellStates(i).notifier).state = const CellState(
       isHovered: false,
       isPaintedOver: false,
     );
   }
   ref.read(paintedOverProvider.notifier).state = <int>[].lock;
   ref.read(hoveredProvider.notifier).state = <int>[].lock;
+  ref.read(isPaintingProvider.notifier).state = false;
+
+  ref.read(historyProvider.notifier).state = <HistoryEvent>[].lock;
+  ref.read(redoHistoryProvider.notifier).state = <HistoryEvent>[].lock;
 }
 
 void loadFromString(WidgetRef ref, String source) {
@@ -51,6 +78,10 @@ void loadFromString(WidgetRef ref, String source) {
     final y = i ~/ ParsingHelper.arenaSize;
     final x = i % ParsingHelper.arenaSize;
     ref.read(gridProvider(i).notifier).state = grid[x][y];
+    ref.read(cellStates(i).notifier).state = const CellState(
+      isHovered: false,
+      isPaintedOver: false,
+    );
   }
 }
 
@@ -67,7 +98,7 @@ List<int> computeFill(ComponentRef ref, int x1, int y1, int x2, int y2) {
     y2 = temp;
   }
 
-  final relevantBlocks = <GridBlock>[];
+  final relevantBlocks = <Cell>[];
   for (int x = x1; x <= x2; x++) {
     for (int y = y1; y <= y2; y++) {
       relevantBlocks.add(getGridBlockNotifier(ref, y, x).state);
@@ -90,7 +121,7 @@ List<int> computeRectOutline(ComponentRef ref, int x1, int y1, int x2, int y2) {
     y2 = temp;
   }
 
-  final relevantBlocks = <GridBlock>[];
+  final relevantBlocks = <Cell>[];
   for (int x = x1; x <= x2; x++) {
     relevantBlocks.add(getGridBlockNotifier(ref, y1, x).state);
     relevantBlocks.add(getGridBlockNotifier(ref, y2, x).state);
@@ -105,8 +136,10 @@ List<int> computeRectOutline(ComponentRef ref, int x1, int y1, int x2, int y2) {
 }
 
 void toolChanged(ComponentRef ref) {
-  ref.read(paintedOverProvider.notifier).state = <int>[].lock;
-  ref.read(hoveredProvider.notifier).state = <int>[].lock;
+  // ref.read(paintedOverProvider.notifier).state = <int>[].lock;
+  // ref.read(hoveredProvider.notifier).state = <int>[].lock;
+  resetHover(ref);
+  ref.read(selectedGridBlockProvider.notifier).state = null;
 }
 
 void onClickBlock(ComponentRef ref, int index) {
@@ -115,65 +148,76 @@ void onClickBlock(ComponentRef ref, int index) {
   final x = index % ParsingHelper.arenaSize;
   final y = index ~/ ParsingHelper.arenaSize;
 
+  invalidateRedoHistory(ref);
+
   switch (ref.read(toolProvider)) {
     case Tool.point:
     case Tool.brush:
-      affectBlock(ref, index);
+      affectBlock(ref, index, recordToHistory: true);
       break;
     case Tool.fillRect:
       if (toolSelected == null) {
         ref.read(selectedGridBlockProvider.notifier).state =
             index % ParsingHelper.arenaSize +
                 (index ~/ ParsingHelper.arenaSize) * ParsingHelper.arenaSize;
-        // hoverOverBlock(ref, index);
-        final cellNotifier = ref.read(gridProvider(index).notifier);
-        cellNotifier.state =
-            cellNotifier.state.copyWith(isPaintedOver: true, isHovered: true);
+
+        final cellStateNotifier = ref.read(cellStates(index).notifier);
+        cellStateNotifier.state = cellStateNotifier.state
+            .copyWith(isPaintedOver: true, isHovered: true);
       } else {
-        computeFill(ref, x, y, toolSelected % ParsingHelper.arenaSize,
-                toolSelected ~/ ParsingHelper.arenaSize)
-            .forEach((index) {
-          affectBlock(ref, index);
-        });
+        var deltas = <Delta>[];
+
+        for (var index in computeFill(
+          ref,
+          x,
+          y,
+          toolSelected % ParsingHelper.arenaSize,
+          toolSelected ~/ ParsingHelper.arenaSize,
+        )) {
+          deltas.add(affectBlock(ref, index));
+        }
         ref.read(selectedGridBlockProvider.notifier).state = null;
         resetHover(ref);
+
+        ref.read(historyProvider.notifier).state =
+            ref.read(historyProvider).add(HistoryEvent(
+                  {for (var e in deltas) e.newState.index: e},
+                ));
       }
       break;
     case Tool.outlineRect:
       if (toolSelected == null) {
         ref.read(selectedGridBlockProvider.notifier).state = index;
         // hoverOverBlock(ref, index);
-        final cellNotifier = ref.read(gridProvider(index).notifier);
-        cellNotifier.state =
-            cellNotifier.state.copyWith(isPaintedOver: true, isHovered: true);
+        final cellStateNotifier = ref.read(cellStates(index).notifier);
+        cellStateNotifier.state = cellStateNotifier.state
+            .copyWith(isPaintedOver: true, isHovered: true);
       } else {
+        var deltas = <Delta>[];
+
         computeRectOutline(ref, x, y, toolSelected % ParsingHelper.arenaSize,
                 toolSelected ~/ ParsingHelper.arenaSize)
             .forEach((index) {
-          affectBlock(ref, index);
+          deltas.add(affectBlock(ref, index));
         });
         ref.read(selectedGridBlockProvider.notifier).state = null;
         resetHover(ref);
+
+        ref.read(historyProvider.notifier).state =
+            ref.read(historyProvider).add(HistoryEvent(
+                  {for (var e in deltas) e.newState.index: e},
+                ));
       }
       break;
   }
 }
 
-// This function is called when a block is clicked in the grid. It determines
-// which prefab is active, and if it's a prefab, it sets the prefab of the
-// clicked block to that prefab. If it's a tool, it uses the tool modifier
-// and the tool value to modify the block's height.
-//
-// Parameters:
-// - ref: The WidgetRef of the widget that called the function
-// - x: The x coordinate of the block in the grid
-// - y: The y coordinate of the block in the grid
-
-void affectBlock(ComponentRef ref, int index) {
+Delta affectBlock(ComponentRef ref, int index, {bool recordToHistory = false}) {
   final activeTab = ref.read(tabProvider);
   final x = index ~/ ParsingHelper.arenaSize;
   final y = index % ParsingHelper.arenaSize;
   final gridElement = getGridBlockNotifier(ref, x, y);
+  final originalState = gridElement.state;
 
   if (activeTab == AppTab.prefabs) {
     switch (ref.read(selectedPrefabProvider)) {
@@ -196,7 +240,16 @@ void affectBlock(ComponentRef ref, int index) {
         gridElement.state = gridElement.state.copyWith(prefab: 'H');
         break;
     }
-    return;
+    final delta =
+        Delta(gridElement.state, originalState, ref.read(toolProvider));
+    if (recordToHistory) {
+      ref.read(historyProvider.notifier).state = ref.read(historyProvider).add(
+            HistoryEvent(
+              {index: delta},
+            ),
+          );
+    }
+    return delta;
   }
 
   switch (ref.read(toolModifierProvider)) {
@@ -218,6 +271,17 @@ void affectBlock(ComponentRef ref, int index) {
               gridElement.state.height + ref.read(plusValueProvider)));
       break;
   }
+
+  final delta = Delta(gridElement.state, originalState, ref.read(toolProvider));
+  if (recordToHistory) {
+    ref.read(historyProvider.notifier).state = ref.read(historyProvider).add(
+          HistoryEvent(
+            {index: delta},
+          ),
+        );
+  }
+
+  return delta;
 }
 
 void hoverOverBlock(ComponentRef ref, int index) {
@@ -262,9 +326,9 @@ void hoverOverBlock(ComponentRef ref, int index) {
       for (var index in ref
           .read(hoveredProvider)
           .where((element) => !relevantBlocks.contains(element))) {
-        final cellNotifier = ref.read(gridProvider(index).notifier);
-        cellNotifier.state =
-            cellNotifier.state.copyWith(isHovered: false, isPaintedOver: false);
+        final cellStateNotifier = ref.read(cellStates(index).notifier);
+        cellStateNotifier.state = cellStateNotifier.state
+            .copyWith(isHovered: false, isPaintedOver: false);
         ref.read(hoveredProvider.notifier).state =
             ref.read(hoveredProvider).remove(index);
       }
@@ -329,6 +393,16 @@ void paintStart(ComponentRef ref) {
 
 void paintStop(ComponentRef ref) {
   ref.read(isPaintingProvider.notifier).state = false;
+  // commit to history
+  ref.read(historyProvider.notifier).state = ref.read(historyProvider).add(
+        HistoryEvent(
+          {
+            for (var delta in ref.read(paintDeltas)) delta.oldState.index: delta
+          },
+        ),
+      );
+  invalidateRedoHistory(ref);
+  ref.read(paintDeltas.notifier).state = <Delta>[].lock;
   resetHover(ref);
 }
 
@@ -340,10 +414,11 @@ void computePaint(ComponentRef ref) {
   for (var index in ref.read(hoveredProvider)) {
     if (paintedNotif.state.contains(index)) continue;
 
-    affectBlock(
+    var d = affectBlock(
       ref,
       index,
     );
+    ref.read(paintDeltas.notifier).state = ref.read(paintDeltas).add(d);
     paintedNotif.state = paintedNotif.state.add(index);
   }
 }
@@ -351,14 +426,22 @@ void computePaint(ComponentRef ref) {
 void resetHover(ComponentRef ref) {
   final hoveredNotifier = ref.read(hoveredProvider.notifier);
   for (var index in hoveredNotifier.state) {
-    final cellNotifier = ref.read(gridProvider(index).notifier);
-    cellNotifier.state =
-        cellNotifier.state.copyWith(isHovered: false, isPaintedOver: false);
+    final cellStateNotifier = ref.read(cellStates(index).notifier);
+    cellStateNotifier.state = cellStateNotifier.state
+        .copyWith(isHovered: false, isPaintedOver: false);
   }
 
   ref.read(hoveredProvider.notifier).state = ref.read(hoveredProvider).clear();
+  final selectedCell = ref.read(selectedGridBlockProvider);
+  if (selectedCell != null) {
+    final cellNotifier = gridProvider(selectedCell).notifier;
+    ref.read(cellNotifier).state = ref.read(cellNotifier).state.copyWith();
+  }
+
   ref.read(paintedOverProvider.notifier).state =
       ref.read(paintedOverProvider).clear();
+
+  ref.read(isPaintingProvider.notifier).state = false;
 }
 
 void setHover(ComponentRef ref, int index, {bool heavy = false}) {
@@ -372,11 +455,12 @@ void setHover(ComponentRef ref, int index, {bool heavy = false}) {
   }
 
   final hovered = ref.read(hoveredProvider);
-  if (hovered.contains(index)) return;
+  final cellStateNotifier = ref.read(cellStates(index).notifier);
+  if (hovered.contains(index) &&
+      !(heavy && !cellStateNotifier.state.isPaintedOver)) return;
   ref.read(hoveredProvider.notifier).state =
       ref.read(hoveredProvider).add(x + y * ParsingHelper.arenaSize);
-  final cellNotifier = ref.read(gridProvider(index).notifier);
-  cellNotifier.state = cellNotifier.state.copyWith(
+  cellStateNotifier.state = cellStateNotifier.state.copyWith(
     isHovered: true,
     isPaintedOver: heavy,
   );

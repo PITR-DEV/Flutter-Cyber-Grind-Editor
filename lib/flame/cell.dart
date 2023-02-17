@@ -22,7 +22,7 @@ class GridBlockComponent extends RectangleComponent
   RectangleComponent? hover;
   SvgComponent? stairsIcon;
 
-  GridBlock? lastBlockData;
+  Cell? lastBlockData;
 
   TextStyle textStyle = const TextStyle(
     fontSize: 25,
@@ -32,7 +32,8 @@ class GridBlockComponent extends RectangleComponent
   static Svg? stairsSvg;
   static bool initialized = false;
 
-  GridBlock get thisBlock => ref.read(gridProvider(index));
+  Cell get thisBlock => ref.read(gridProvider(index));
+  CellState get thisState => ref.read(cellStates(index));
   AppTab get currentTab => ref.read(tabProvider);
 
   @override
@@ -49,6 +50,7 @@ class GridBlockComponent extends RectangleComponent
       parent?.remove(stairsIcon!);
       stairsIcon = null;
     }
+
     super.onRemove();
   }
 
@@ -78,12 +80,18 @@ class GridBlockComponent extends RectangleComponent
         scale: Vector2.all(0.6),
         priority: 100);
     // print('cell $index mounted');
-    reloadCell(ref.read(tabProvider));
+    updateCell(ref.read(tabProvider));
     text!.anchor = Anchor.center;
     text!.position = Vector2(width / 2, height / 2);
     add(text!);
 
-    listen(gridProvider(index), (_, GridBlock? next) {
+    listen(cellStates(index), (_, CellState? next) {
+      if (next == null) return;
+      // updateHover(next.isHovered, next.isPaintedOver);
+      updateCellState();
+    });
+
+    listen(gridProvider(index), (_, Cell? next) {
       if (next != null) {
         if (lastBlockData == null) {
           lastBlockData = next;
@@ -91,65 +99,62 @@ class GridBlockComponent extends RectangleComponent
           return;
         }
         lastBlockData = next;
-
-        if (next.isPaintedOver) {
-          reloadCell(currentTab);
-        } else {
-          setColor(
-            ColorHelper.heightToColor(thisBlock.height),
-          );
-          // move cell to bottom
-          priority = 0;
-          if (hover != null) {
-            parent?.remove(hover!);
-            hover = null;
-          }
-
-          reloadCell(currentTab);
-        }
-
-        if (next.isHovered) {
-          if (hover == null || hover?.parent == null) {
-            hover ??= RectangleComponent(
-              position: position + Vector2.all(cellSize() / 2),
-              size: Vector2(width * 1.13, height * 1.13),
-              anchor: Anchor.center,
-              priority: 50,
-            )..setColor(Colors.red);
-            // move cell to top
-            priority = 80;
-            parent?.add(hover!);
-            reloadCell(currentTab);
-          }
-        } else {
-          if (hover != null) {
-            setColor(
-              ColorHelper.heightToColor(thisBlock.height),
-            );
-            // move cell to bottom
-            priority = 0;
-            parent?.remove(hover!);
-            reloadCell(currentTab);
-          }
-        }
+        updateCell(currentTab);
       }
     });
 
     listen(tabProvider, (_, AppTab next) {
-      print('tab changed');
-      reloadCell(next);
+      updateCell(next);
     });
   }
 
-  void updateForegroundColor() {
-    text?.textRenderer = TextPaint(
-      style: textStyle.copyWith(
-        color: ColorHelper.blockTextColor(thisBlock.height),
-      ),
-    );
+  void updateCellState() {
+    final cellState = thisState;
+    final isHovered = cellState.isHovered;
+
+    if (isHovered) {
+      if (hover == null || hover?.parent == null) {
+        hover ??= RectangleComponent(
+          position: position + Vector2.all(cellSize() / 2),
+          size: Vector2(width * 1.13, height * 1.13),
+          anchor: Anchor.center,
+          priority: 50,
+        )..setColor(Colors.red);
+
+        // move cell to top
+        priority = 80;
+        parent?.add(hover!);
+        // reloadCell(currentTab);
+      }
+    } else {
+      if (hover != null) {
+        setColor(
+          ColorHelper.heightToColor(thisBlock.height),
+        );
+        // move cell to bottom
+        priority = 0;
+        if (hover!.parent != null) hover!.parent!.remove(hover!);
+        // reloadCell(currentTab);
+      }
+    }
+
+    updateHeight();
   }
 
-  void reloadCell(AppTab activeTab) {
+  void updateHeight() {
+    final isTinted = thisState.isPaintedOver;
+    final enableBackgroundTint = ref.read(Preferences.brushTintEnabled);
+    if (isTinted && enableBackgroundTint) {
+      var color = ColorHelper.heightToColor(thisBlock.height);
+      color = Color.alphaBlend(Colors.red.withOpacity(0.2), color);
+      setColor(color);
+    } else {
+      var color = ColorHelper.heightToColor(thisBlock.height);
+      setColor(color);
+    }
+  }
+
+  void updateCell(AppTab activeTab) {
     updateForegroundColor();
 
     if (ref.read(Preferences.debugOverlay)) {
@@ -167,19 +172,7 @@ class GridBlockComponent extends RectangleComponent
       text?.text = desiredText;
     }
 
-    final enableBackgroundTint = ref.read(Preferences.brushTintEnabled);
-    final isPaintedOver = thisBlock.isPaintedOver;
-    final isSelectedPoint = ref.read(selectedGridBlockProvider) == index;
     final isInPrefabMode = ref.read(tabProvider) == AppTab.prefabs;
-
-    if ((isPaintedOver || isSelectedPoint) && enableBackgroundTint) {
-      var color = ColorHelper.heightToColor(thisBlock.height);
-      color = Color.alphaBlend(Colors.red.withOpacity(0.2), color);
-      setColor(color);
-    } else {
-      var color = ColorHelper.heightToColor(thisBlock.height);
-      setColor(color);
-    }
 
     if (thisBlock.prefab == 's') {
       if (stairsIcon == null) {
@@ -200,7 +193,7 @@ class GridBlockComponent extends RectangleComponent
               ),
             ),
           );
-        ;
+
         add(stairsIcon!);
       }
     } else {
@@ -218,6 +211,16 @@ class GridBlockComponent extends RectangleComponent
         color: textColor,
         fontSize: 25,
         fontWeight: FontWeight.w500,
+      ),
+    );
+
+    updateHeight();
+  }
+
+  void updateForegroundColor() {
+    text?.textRenderer = TextPaint(
+      style: textStyle.copyWith(
+        color: ColorHelper.blockTextColor(thisBlock.height),
       ),
     );
   }

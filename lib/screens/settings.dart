@@ -28,17 +28,6 @@ class SettingsPage extends ConsumerWidget {
               leading: const Icon(Icons.color_lens),
             ),
             ListTile(
-              title: const Text('Show Editor App Bar'),
-              subtitle: const Text('Show the navigation app bar in the editor'),
-              trailing: Switch(
-                value: ref.watch(Preferences.showEditorAppBar),
-                onChanged: (value) {
-                  ref.read(Preferences.showEditorAppBar.notifier).state = value;
-                },
-              ),
-              leading: const Icon(Icons.arrow_back),
-            ),
-            ListTile(
               title: const Text('Brush Tint'),
               subtitle: const Text(
                   'Indicate painted-over cells with a background tint'),

@@ -35,6 +35,7 @@ class _ArenaGridState extends ConsumerState<ArenaGrid> {
       onExit: (event) {
         if (!ref.read(isPaintingProvider)) {
           resetHover(cmpRef);
+          game.resetLocalHover();
         }
       },
       child: Listener(

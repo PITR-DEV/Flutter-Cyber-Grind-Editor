@@ -3,7 +3,7 @@ import 'package:cgef/models/grid_block.dart';
 class ParsingHelper {
   static const arenaSize = 16;
 
-  List<List<GridBlock>> importString(String input) {
+  List<List<Cell>> importString(String input) {
     final lines = input.split('\n');
 
     if (lines.length != arenaSize * 2 + 1) {
@@ -14,12 +14,10 @@ class ParsingHelper {
         ParsingHelper.arenaSize,
         (x) => List.generate(
               ParsingHelper.arenaSize,
-              (y) => GridBlock(
+              (y) => Cell(
                 height: 0,
                 prefab: '0',
                 index: x * arenaSize + y,
-                isHovered: false,
-                isPaintedOver: false,
               ),
             ),
         growable: false);
@@ -69,7 +67,7 @@ class ParsingHelper {
     return grid;
   }
 
-  String stringifyPattern(List<List<GridBlock>> source) {
+  String stringifyPattern(List<List<Cell>> source) {
     var builder = '';
 
     for (var y = 0; y < arenaSize; y++) {

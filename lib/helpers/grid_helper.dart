@@ -18,10 +18,10 @@ int gridHeightLimiter(int value) {
   return value;
 }
 
-List<List<GridBlock>> getGrid(ComponentRef ref) {
-  final grid = <List<GridBlock>>[];
+List<List<Cell>> getGrid(ComponentRef ref) {
+  final grid = <List<Cell>>[];
   for (int x = 0; x < ParsingHelper.arenaSize; x++) {
-    final row = <GridBlock>[];
+    final row = <Cell>[];
     for (int y = 0; y < ParsingHelper.arenaSize; y++) {
       row.add(ref.read(gridProvider(x * ParsingHelper.arenaSize + y)));
     }

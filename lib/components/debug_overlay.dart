@@ -1,5 +1,6 @@
 import 'package:cgef/providers/app_provider.dart';
 import 'package:cgef/providers/grid_provider.dart';
+import 'package:cgef/providers/history_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,7 +22,11 @@ class DebugOverlay extends ConsumerWidget {
         'painted: [${ref.watch(paintedOverProvider).join(', ')}]\n'
         'isClickPending: ${ref.watch(isClickPendingProvider)}\n'
         'updated: ${ref.watch(debugCellsUpdatedProvider)}\n'
-        'updatedLit: [${ref.watch(debugCellsUpdatedProvider2).join(', ')}]\n',
+        'updatedLit: [${ref.watch(debugCellsUpdatedProvider2).join(', ')}]\n'
+        // 'history: [${ref.watch(historyProvider).join(', ')}]\n'
+        // 'redoHistory: [${ref.watch(redoHistoryProvider).map((e) => e.deltas.entries.map((d) => '${d.key}: ${d.value.oldState} -> ${d.value.newState}').join(', ')).join(', ')}]\n',
+        'undos: ${ref.watch(historyProvider).length}\n'
+        'redos: ${ref.watch(redoHistoryProvider).length}\n',
         style: TextStyle(
           color: Colors.white,
           fontSize: 12,
