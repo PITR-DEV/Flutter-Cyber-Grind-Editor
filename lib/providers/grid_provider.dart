@@ -82,6 +82,9 @@ void loadFromString(WidgetRef ref, String source) {
       isHovered: false,
       isPaintedOver: false,
     );
+    ref.read(historyProvider.notifier).state = <HistoryEvent>[].lock;
+    ref.read(redoHistoryProvider.notifier).state = <HistoryEvent>[].lock;
+    resetVolatileState(ref);
   }
 }
 

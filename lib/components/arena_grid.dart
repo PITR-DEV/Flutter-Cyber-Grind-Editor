@@ -16,19 +16,19 @@ class ArenaGrid extends ConsumerStatefulWidget {
 }
 
 class _ArenaGridState extends ConsumerState<ArenaGrid> {
-  List<Widget> _generateGridBlocks() {
-    return List.generate(
-      ParsingHelper.arenaSize * ParsingHelper.arenaSize,
-      (i) {
-        // top left corner 0,0
-        // cell to the right 1,0
-        final index = i;
-        return GridBlockButton(index);
-      },
-    );
-  }
+  // List<Widget> _generateGridBlocks() {
+  //   return List.generate(
+  //     ParsingHelper.arenaSize * ParsingHelper.arenaSize,
+  //     (i) {
+  //       // top left corner 0,0
+  //       // cell to the right 1,0
+  //       final index = i;
+  //       return GridBlockButton(index);
+  //     },
+  //   );
+  // }
 
-  Widget? _buildArenaGrid(BuildContext context) {
+  Widget? cellGrid(BuildContext context) {
     final game = GridGame(ref);
     final cmpRef = ComponentRef(ref);
     return MouseRegion(
@@ -58,7 +58,7 @@ class _ArenaGridState extends ConsumerState<ArenaGrid> {
   Widget build(BuildContext context) {
     final pinchable = context.breakpoint <= LayoutBreakpoint.xs;
 
-    final grid = _buildArenaGrid(context)!;
+    final grid = cellGrid(context)!;
 
     return grid;
   }

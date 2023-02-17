@@ -2,6 +2,7 @@ import 'package:cgef/models/enums.dart';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flame/components.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:async' as dart_async;
 
 final toolProvider = StateProvider((ref) => Tool.point);
 final toolModifierProvider = StateProvider((ref) => ToolModifier.plusOne);
@@ -21,3 +22,16 @@ final debugCellsUpdatedProvider = StateProvider((ref) => 0);
 final debugCellsUpdatedProvider2 = StateProvider((ref) => <int>[].lock);
 
 final pastHomeProvider = StateProvider((ref) => false);
+final filePath = StateProvider<String?>((ref) => null);
+
+final notificationProvider = StateProvider<String?>((ref) => null);
+
+dart_async.Timer? notificationTimer;
+void showNotification(String text, WidgetRef ref) {
+  notificationTimer?.cancel();
+  notificationTimer = dart_async.Timer(const Duration(seconds: 3), () {
+    ref.read(notificationProvider.notifier).state = null;
+  });
+
+  ref.read(notificationProvider.notifier).state = text;
+}

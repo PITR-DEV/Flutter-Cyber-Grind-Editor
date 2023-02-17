@@ -1,4 +1,5 @@
 import 'package:cgef/models/history_item.dart';
+import 'package:cgef/providers/app_provider.dart';
 import 'package:cgef/providers/grid_provider.dart';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
@@ -50,4 +51,10 @@ void applyDeltas(HistoryEvent event, WidgetRef ref,
           event.deltas[index]!.oldState;
     }
   }
+
+  showNotification(
+    '${event.deltas.length} change${event.deltas.length == 1 ? '' : 's'}'
+    ' ${actionUndo ? 'redone' : 'undone'}',
+    ref,
+  );
 }

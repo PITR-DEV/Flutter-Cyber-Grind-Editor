@@ -1,4 +1,6 @@
 import 'package:cgef/components/input/tab_button.dart';
+import 'package:cgef/components/notification_receiver.dart';
+import 'package:cgef/helpers/file_helper.dart';
 import 'package:cgef/models/enums.dart';
 import 'package:cgef/providers/app_provider.dart';
 import 'package:cgef/providers/grid_provider.dart';
@@ -45,7 +47,7 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
     return ListView(
       children: [
         const Toolbox(),
-        Divider(),
+        const Divider(),
         secondaryDrawer(),
       ],
     );
@@ -104,137 +106,163 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size(0, 48),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            Expanded(
-              child: MenuBar(
-                style: MenuStyle(
-                  shadowColor: MaterialStateProperty.all(Colors.transparent),
-                  backgroundColor: MaterialStateProperty.all(
-                    Theme.of(context).colorScheme.surface,
-                  ),
-                  side: MaterialStateProperty.all(
-                    BorderSide(
-                      color:
-                          Theme.of(context).colorScheme.outline.withAlpha(60),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: MenuBar(
+                    style: MenuStyle(
+                      shadowColor:
+                          MaterialStateProperty.all(Colors.transparent),
+                      backgroundColor: MaterialStateProperty.all(
+                        Theme.of(context).colorScheme.surface,
+                      ),
+                      side: MaterialStateProperty.all(
+                        BorderSide(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .outline
+                              .withAlpha(60),
+                        ),
+                      ),
                     ),
+                    children: [
+                      const MenuItemButton(
+                        child: Text('cgef'),
+                      ),
+                      SubmenuButton(
+                        menuChildren: [
+                          SizedBox(
+                            width: 280,
+                            child: MenuItemButton(
+                              shortcut: const SingleActivator(
+                                LogicalKeyboardKey.keyN,
+                                control: true,
+                              ),
+                              onPressed: () {
+                                newPattern(ref);
+                              },
+                              leadingIcon: const Icon(Icons.clear_all),
+                              child: const Text('New'),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 280,
+                            child: MenuItemButton(
+                              shortcut: const SingleActivator(
+                                LogicalKeyboardKey.keyL,
+                                control: true,
+                              ),
+                              onPressed: () async {
+                                await promptLoad(ref);
+                              },
+                              leadingIcon: const Icon(Icons.folder_open),
+                              child: const Text('Load'),
+                            ),
+                          ),
+                          const Divider(),
+                          SizedBox(
+                            width: 280,
+                            child: MenuItemButton(
+                              shortcut: const SingleActivator(
+                                LogicalKeyboardKey.keyS,
+                                control: true,
+                              ),
+                              onPressed: ref.watch(filePath)?.isEmpty ?? true
+                                  ? null
+                                  : () {
+                                      save(ref);
+                                    },
+                              leadingIcon: const Icon(Icons.save),
+                              child: const Text('Save'),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 280,
+                            child: MenuItemButton(
+                              shortcut: const SingleActivator(
+                                LogicalKeyboardKey.keyS,
+                                control: true,
+                                shift: true,
+                              ),
+                              onPressed: () async {
+                                await promptSaveAs(ref);
+                              },
+                              leadingIcon: const Icon(Icons.save_alt),
+                              child: const Text('Save As'),
+                            ),
+                          ),
+                          const Divider(),
+                          SizedBox(
+                            width: 280,
+                            child: MenuItemButton(
+                              shortcut: const SingleActivator(
+                                LogicalKeyboardKey.escape,
+                              ),
+                              leadingIcon: const Icon(Icons.exit_to_app),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: const Text('Main Menu'),
+                            ),
+                          ),
+                        ],
+                        child: const Text('File'),
+                      ),
+                      SubmenuButton(
+                        menuChildren: [
+                          SizedBox(
+                            width: 280,
+                            child: MenuItemButton(
+                              shortcut: const SingleActivator(
+                                LogicalKeyboardKey.keyZ,
+                                control: true,
+                              ),
+                              leadingIcon: const Icon(Icons.undo),
+                              onPressed: ref.watch(historyProvider).isNotEmpty
+                                  ? () {
+                                      undo(ref);
+                                    }
+                                  : null,
+                              child: Text(
+                                  'Undo ${ref.watch(historyProvider).isNotEmpty ? '(${ref.watch(historyProvider).length})' : ''}'),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 280,
+                            child: MenuItemButton(
+                              shortcut: const SingleActivator(
+                                LogicalKeyboardKey.keyY,
+                                control: true,
+                              ),
+                              leadingIcon: const Icon(Icons.redo),
+                              onPressed:
+                                  ref.watch(redoHistoryProvider).isNotEmpty
+                                      ? () {
+                                          redo(ref);
+                                        }
+                                      : null,
+                              child: Text(
+                                  'Redo ${ref.watch(redoHistoryProvider).isNotEmpty ? '(${ref.watch(redoHistoryProvider).length})' : ''}'),
+                            ),
+                          ),
+                        ],
+                        child: const Text('Edit'),
+                      ),
+                      MenuItemButton(
+                        child: const Text('Settings'),
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/settings');
+                        },
+                      ),
+                    ],
                   ),
                 ),
-                children: [
-                  const MenuItemButton(
-                    child: Text('cgef'),
-                  ),
-                  SubmenuButton(
-                    menuChildren: [
-                      SizedBox(
-                        width: 280,
-                        child: MenuItemButton(
-                          shortcut: const SingleActivator(
-                            LogicalKeyboardKey.keyN,
-                            control: true,
-                          ),
-                          onPressed: () {
-                            newPattern(ref);
-                          },
-                          leadingIcon: const Icon(Icons.clear_all),
-                          child: const Text('New'),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 280,
-                        child: MenuItemButton(
-                          shortcut: const SingleActivator(
-                            LogicalKeyboardKey.keyS,
-                            control: true,
-                          ),
-                          onPressed: () {
-                            // ref.read(gridProvider.notifier).newGrid();
-                          },
-                          leadingIcon: const Icon(Icons.save),
-                          child: const Text('Save'),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 280,
-                        child: MenuItemButton(
-                          shortcut: const SingleActivator(
-                            LogicalKeyboardKey.keyS,
-                            control: true,
-                            shift: true,
-                          ),
-                          onPressed: () {
-                            // ref.read(gridProvider.notifier).newGrid();
-                          },
-                          leadingIcon: const Icon(Icons.save_alt),
-                          child: const Text('Save As'),
-                        ),
-                      ),
-                      const Divider(),
-                      SizedBox(
-                        width: 280,
-                        child: MenuItemButton(
-                          shortcut: const SingleActivator(
-                            LogicalKeyboardKey.escape,
-                          ),
-                          leadingIcon: const Icon(Icons.exit_to_app),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: const Text('Main Menu'),
-                        ),
-                      ),
-                    ],
-                    child: const Text('File'),
-                  ),
-                  SubmenuButton(
-                    menuChildren: [
-                      SizedBox(
-                        width: 280,
-                        child: MenuItemButton(
-                          shortcut: const SingleActivator(
-                            LogicalKeyboardKey.keyZ,
-                            control: true,
-                          ),
-                          leadingIcon: const Icon(Icons.undo),
-                          onPressed: ref.watch(historyProvider).isNotEmpty
-                              ? () {
-                                  undo(ref);
-                                }
-                              : null,
-                          child: Text(
-                              'Undo ${ref.watch(historyProvider).isNotEmpty ? '(${ref.watch(historyProvider).length})' : ''}'),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 280,
-                        child: MenuItemButton(
-                          shortcut: const SingleActivator(
-                            LogicalKeyboardKey.keyY,
-                            control: true,
-                          ),
-                          leadingIcon: const Icon(Icons.redo),
-                          onPressed: ref.watch(redoHistoryProvider).isNotEmpty
-                              ? () {
-                                  redo(ref);
-                                }
-                              : null,
-                          child: Text(
-                              'Redo ${ref.watch(redoHistoryProvider).isNotEmpty ? '(${ref.watch(redoHistoryProvider).length})' : ''}'),
-                        ),
-                      ),
-                    ],
-                    child: const Text('Edit'),
-                  ),
-                  MenuItemButton(
-                    child: const Text('Settings'),
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/settings');
-                    },
-                  ),
-                ],
-              ),
+              ],
             ),
+            const Positioned(top: 9, right: 12, child: NotificationReceiver()),
           ],
         ),
       ),
