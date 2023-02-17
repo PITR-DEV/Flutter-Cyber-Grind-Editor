@@ -1,4 +1,5 @@
 import 'package:cgef/providers/pref_provider.dart';
+import 'package:cgef/services/preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -23,6 +24,7 @@ class SettingsPage extends ConsumerWidget {
                 onChanged: (value) {
                   ref.read(Preferences.blackBackgroundProvider.notifier).state =
                       value;
+                  prefs.setBool(PreferenceProperties.blackBackground, value);
                 },
               ),
               leading: const Icon(Icons.color_lens),
@@ -35,6 +37,7 @@ class SettingsPage extends ConsumerWidget {
                 value: ref.watch(Preferences.brushTintEnabled),
                 onChanged: (value) {
                   ref.read(Preferences.brushTintEnabled.notifier).state = value;
+                  prefs.setBool(PreferenceProperties.brushTintEnabled, value);
                 },
               ),
               leading: const Icon(Icons.brush),
@@ -50,6 +53,7 @@ class SettingsPage extends ConsumerWidget {
                 value: ref.watch(Preferences.debugOverlay),
                 onChanged: (value) {
                   ref.read(Preferences.debugOverlay.notifier).state = value;
+                  prefs.setBool(PreferenceProperties.debugOverlay, value);
                 },
               ),
               leading: const Icon(Icons.bug_report),

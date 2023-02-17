@@ -1,9 +1,10 @@
 import 'package:cgef/components/debug_overlay.dart';
 import 'package:cgef/providers/pref_provider.dart';
-import 'package:cgef/screens/main_layout.dart';
-import 'package:cgef/screens/home_screen.dart';
-import 'package:cgef/screens/settings.dart';
+import 'package:cgef/pages/main_layout.dart';
+import 'package:cgef/pages/home_screen.dart';
+import 'package:cgef/pages/settings.dart';
 import 'package:cgef/components/quit_confirmation.dart';
+import 'package:cgef/services/preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_window_close/flutter_window_close.dart';
@@ -14,6 +15,8 @@ Future<void> main() async {
   rootWidget = Layout(child: rootWidget);
   rootWidget = ProviderScope(child: rootWidget);
 
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializePreferences();
   runApp(rootWidget);
 }
 
