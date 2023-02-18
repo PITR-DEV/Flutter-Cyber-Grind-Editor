@@ -20,6 +20,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   String appVersion = '';
+  bool showContinue = false;
 
   void _openFilePicker() async {
     var specifyExtension =
@@ -44,7 +45,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     var file = File(result.files.single.path!);
     file.readAsString().then((String contents) {
       loadFromString(ref, contents);
-      ref.read(pastHomeProvider.notifier).state = true;
+      setState(() {
+        showContinue = true;
+      });
       Navigator.of(context).pushNamed('/editor');
     });
   }
@@ -67,7 +70,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     var bigLogo = context.breakpoint > LayoutBreakpoint.xs;
-    var showContinue = ref.read(pastHomeProvider);
 
     return Scaffold(
       body: Stack(
@@ -108,6 +110,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: FatButton(
                     onPressed: () {
                       newPattern(ref);
+                      setState(() {
+                        showContinue = true;
+                      });
                       Navigator.pushNamed(context, '/editor');
                     },
                     child: const Text('NEW'),

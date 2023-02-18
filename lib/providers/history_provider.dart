@@ -15,6 +15,11 @@ void invalidateRedoHistory(ComponentRef ref) {
 }
 
 void undo(WidgetRef ref) {
+  if (ref.read(historyProvider).isEmpty) {
+    showNotification('There\'s nothing to undo', ref);
+    return;
+  }
+
   final historyItem = ref.read(historyProvider).last;
 
   // push into the redo history
@@ -28,6 +33,10 @@ void undo(WidgetRef ref) {
 }
 
 void redo(WidgetRef ref) {
+  if (ref.read(redoHistoryProvider).isEmpty) {
+    showNotification('There\'s nothing to redo', ref);
+    return;
+  }
   final historyItem = ref.read(redoHistoryProvider).last;
 
   // push into the undo history

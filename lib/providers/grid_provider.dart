@@ -46,7 +46,6 @@ final paintDeltas = StateProvider((ref) => <Delta>[].lock);
 final isPaintingProvider = StateProvider((ref) => false);
 
 void newPattern(WidgetRef ref) {
-  ref.read(pastHomeProvider.notifier).state = true;
   resetPattern(ref);
 }
 

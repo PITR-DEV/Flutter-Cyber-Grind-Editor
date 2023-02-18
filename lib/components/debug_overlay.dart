@@ -15,7 +15,6 @@ class DebugOverlay extends ConsumerWidget {
         'tool: ${ref.watch(toolProvider)}\n'
         'toolModifier: ${ref.watch(toolModifierProvider)}\n'
         'selectedPrefab: ${ref.watch(selectedPrefabProvider)}\n'
-        'pastHome: ${ref.watch(pastHomeProvider)}\n'
         'hovered: ${ref.watch(hoveredCellIndexProvider)}\n'
         'hoverEffect: [${ref.watch(hoveredProvider).join(', ')}]\n'
         'isPainting: ${ref.watch(isPaintingProvider)}\n'

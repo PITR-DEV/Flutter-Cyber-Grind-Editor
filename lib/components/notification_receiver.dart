@@ -25,7 +25,7 @@ class _NotificationReceiverState extends ConsumerState<NotificationReceiver> {
 
     return AnimatedOpacity(
       opacity: notification?.isNotEmpty ?? false ? 1 : 0,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 200),
       child: Text(notification ?? cachedText ?? ''),
     );
   }

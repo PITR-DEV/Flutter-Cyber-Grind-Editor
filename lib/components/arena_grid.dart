@@ -49,6 +49,7 @@ class _ArenaGridState extends ConsumerState<ArenaGrid> {
         child: GameWidget(
           key: const Key('grid'),
           game: game,
+          autofocus: false,
         ),
       ),
     );

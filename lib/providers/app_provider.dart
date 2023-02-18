@@ -21,17 +21,23 @@ final isClickPendingProvider = StateProvider((ref) => false);
 final debugCellsUpdatedProvider = StateProvider((ref) => 0);
 final debugCellsUpdatedProvider2 = StateProvider((ref) => <int>[].lock);
 
-final pastHomeProvider = StateProvider((ref) => false);
 final filePath = StateProvider<String?>((ref) => null);
 
 final notificationProvider = StateProvider<String?>((ref) => null);
 
 dart_async.Timer? notificationTimer;
 void showNotification(String text, WidgetRef ref) {
+  final notificationNotifier = ref.read(notificationProvider.notifier);
   notificationTimer?.cancel();
-  notificationTimer = dart_async.Timer(const Duration(seconds: 3), () {
-    ref.read(notificationProvider.notifier).state = null;
+  notificationTimer = dart_async.Timer(const Duration(seconds: 1), () {
+    notificationNotifier.state = null;
   });
 
-  ref.read(notificationProvider.notifier).state = text;
+  if (notificationNotifier.state?.isNotEmpty ?? false) {
+    notificationNotifier.state = null;
+  }
+
+  Future.delayed(const Duration(milliseconds: 50), () {
+    notificationNotifier.state = text;
+  });
 }

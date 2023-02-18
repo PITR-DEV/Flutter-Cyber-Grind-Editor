@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ButtonNumberField extends ConsumerStatefulWidget {
-  ButtonNumberField({
+  const ButtonNumberField({
     Key? key,
     this.initialValue = 0,
     this.onValueChanged,
@@ -14,15 +14,15 @@ class ButtonNumberField extends ConsumerStatefulWidget {
     this.active = false,
     this.child,
   }) : super(key: key);
-  int initialValue = 0;
-  Function(int)? onValueChanged = (int value) {};
-  Function()? onSelect = () {};
+  final int initialValue;
+  final Function(int)? onValueChanged;
+  final Function()? onSelect;
 
-  int min;
-  int max;
+  final int min;
+  final int max;
 
-  Widget? child;
-  bool active;
+  final Widget? child;
+  final bool active;
 
   @override
   createState() => _ButtonNumberField();
