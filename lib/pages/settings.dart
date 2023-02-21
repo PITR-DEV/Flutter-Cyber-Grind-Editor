@@ -42,6 +42,20 @@ class SettingsPage extends ConsumerWidget {
               ),
               leading: const Icon(Icons.brush),
             ),
+            ListTile(
+              title: const Text('Color Coded Prefabs'),
+              subtitle:
+                  const Text('Indicate prefab types with distinct colors'),
+              trailing: Switch(
+                value: ref.watch(Preferences.colorCodedPrefabs),
+                onChanged: (value) {
+                  ref.read(Preferences.colorCodedPrefabs.notifier).state =
+                      value;
+                  prefs.setBool(PreferenceProperties.colorCodedPrefabs, value);
+                },
+              ),
+              leading: const Icon(Icons.palette),
+            ),
             const Divider(
               thickness: 1,
               height: 1,

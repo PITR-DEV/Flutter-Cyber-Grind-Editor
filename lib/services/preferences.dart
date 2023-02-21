@@ -10,4 +10,5 @@ class PreferenceProperties {
   static const blackBackground = 'blackBackground';
   static const debugOverlay = 'debugOverlay';
   static const brushTintEnabled = 'brushTintEnabled';
+  static const colorCodedPrefabs = 'colorCodedPrefabs';
 }

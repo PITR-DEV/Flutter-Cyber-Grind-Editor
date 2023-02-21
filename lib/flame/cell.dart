@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cgef/helpers/color_helper.dart';
 import 'package:cgef/helpers/parsing_helper.dart';
+import 'package:cgef/helpers/prefab_helper.dart';
 import 'package:cgef/models/enums.dart';
 import 'package:cgef/models/grid_block.dart';
 import 'package:cgef/providers/app_provider.dart';
@@ -20,6 +21,7 @@ class GridBlockComponent extends RectangleComponent
 
   TextComponent? text;
   RectangleComponent? hover;
+  CircleComponent? prefabColorCircle;
   SvgComponent? stairsIcon;
   ColorEffect? overlayColorEffect;
 
@@ -91,6 +93,8 @@ class GridBlockComponent extends RectangleComponent
         updateCellState();
       }
     });
+
+    listen(Preferences.colorCodedPrefabs, (p0, p1) => updateCell(currentTab));
 
     listen(cellStates(index), (_, CellState? next) {
       if (next == null) return;
@@ -189,6 +193,7 @@ class GridBlockComponent extends RectangleComponent
           size: Vector2.all(cellSize() * 0.3),
           anchor: Anchor.bottomLeft,
           position: Vector2(3, height - 3),
+          paint: Paint()..color = Colors.red,
         )..add(overlayColorEffect!);
         add(stairsIcon!);
       } else {
@@ -240,8 +245,31 @@ class GridBlockComponent extends RectangleComponent
 
     updateStairs();
     var textColor = ColorHelper.blockTextColor(thisBlock.height);
-    if (isInPrefabMode && thisBlock.prefab == '0') {
-      textColor = textColor.withAlpha(10);
+    if (isInPrefabMode) {
+      if (thisBlock.prefab == '0') textColor = textColor.withAlpha(10);
+
+      if (ref.read(Preferences.colorCodedPrefabs) &&
+          ColorHelper.prefabColors
+              .containsKey(getPrefabFromSymbol(thisBlock.prefab))) {
+        var color =
+            ColorHelper.prefabColors[getPrefabFromSymbol(thisBlock.prefab)]!;
+
+        if (prefabColorCircle == null ||
+            color != prefabColorCircle?.paint.color) {
+          prefabColorCircle = CircleComponent(
+            radius: cellSize() * 0.3,
+            anchor: Anchor.center,
+            position: Vector2(width / 2, height / 2),
+            priority: 120,
+          );
+          prefabColorCircle!.setColor(color);
+          add(prefabColorCircle!);
+        }
+      } else {
+        removeColorOverlay();
+      }
+    } else {
+      removeColorOverlay();
     }
     text?.textRenderer = TextPaint(
       style: TextStyle(
@@ -252,6 +280,15 @@ class GridBlockComponent extends RectangleComponent
     );
 
     updateHeight();
+  }
+
+  void removeColorOverlay() {
+    if (prefabColorCircle != null) {
+      if (prefabColorCircle!.parent != null) {
+        prefabColorCircle!.parent!.remove(prefabColorCircle!);
+      }
+      prefabColorCircle = null;
+    }
   }
 
   void updateForegroundColor() {

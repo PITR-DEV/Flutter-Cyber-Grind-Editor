@@ -40,6 +40,7 @@ dependencies:
   flame_riverpod: ^4.0.0+2
   shared_preferences: ^2.0.17
   flutter_svg: ^1.1.6
+  vector_math: ^2.1.4
 
 dev_dependencies:
   build_runner: ^2.3.3

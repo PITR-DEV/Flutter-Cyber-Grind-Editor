@@ -1,5 +1,6 @@
 import 'package:cgef/helpers/grid_helper.dart';
 import 'package:cgef/helpers/parsing_helper.dart';
+import 'package:cgef/helpers/prefab_helper.dart';
 import 'package:cgef/models/grid_block.dart';
 import 'package:cgef/models/history_item.dart';
 import 'package:cgef/providers/app_provider.dart';
@@ -222,26 +223,12 @@ Delta affectBlock(ComponentRef ref, int index, {bool recordToHistory = false}) {
   final originalState = gridElement.state;
 
   if (activeTab == AppTab.prefabs) {
-    switch (ref.read(selectedPrefabProvider)) {
-      case Prefab.none:
-        gridElement.state = gridElement.state.copyWith(prefab: '0');
-        break;
-      case Prefab.melee:
-        gridElement.state = gridElement.state.copyWith(prefab: 'n');
-        break;
-      case Prefab.projectile:
-        gridElement.state = gridElement.state.copyWith(prefab: 'p');
-        break;
-      case Prefab.jumpPad:
-        gridElement.state = gridElement.state.copyWith(prefab: 'J');
-        break;
-      case Prefab.stairs:
-        gridElement.state = gridElement.state.copyWith(prefab: 's');
-        break;
-      case Prefab.hideous:
-        gridElement.state = gridElement.state.copyWith(prefab: 'H');
-        break;
-    }
+    gridElement.state = gridElement.state.copyWith(
+      prefab: getPrefabSymbol(
+        ref.read(selectedPrefabProvider),
+      ),
+    );
+
     final delta =
         Delta(gridElement.state, originalState, ref.read(toolProvider));
     if (recordToHistory) {

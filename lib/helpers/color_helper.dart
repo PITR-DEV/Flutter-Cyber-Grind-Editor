@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:bezier/bezier.dart';
+import 'package:cgef/models/enums.dart';
 import 'package:vector_math/vector_math.dart';
 
 class ColorHelper {
@@ -64,4 +65,11 @@ class ColorHelper {
           : Color.fromARGB(255, color, color, color);
     }
   }
+
+  static Map<Prefab, Color> prefabColors = {
+    Prefab.melee: const Color.fromARGB(255, 135, 185, 88),
+    Prefab.projectile: const Color.fromARGB(255, 238, 184, 103),
+    Prefab.jumpPad: const Color.fromARGB(255, 114, 175, 255),
+    Prefab.hideous: const Color.fromARGB(255, 221, 85, 85),
+  };
 }

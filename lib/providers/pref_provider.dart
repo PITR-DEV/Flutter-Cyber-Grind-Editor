@@ -8,4 +8,6 @@ class Preferences {
       (ref) => prefs.getBool(PreferenceProperties.debugOverlay) ?? false);
   static final brushTintEnabled = StateProvider(
       (ref) => prefs.getBool(PreferenceProperties.brushTintEnabled) ?? true);
+  static final colorCodedPrefabs = StateProvider(
+      (ref) => prefs.getBool(PreferenceProperties.colorCodedPrefabs) ?? true);
 }
