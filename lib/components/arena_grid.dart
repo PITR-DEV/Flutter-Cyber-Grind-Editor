@@ -1,7 +1,10 @@
+import 'dart:ui';
+
 import 'package:cgef/flame/grid.dart';
 import 'package:cgef/providers/grid_provider.dart';
 import 'package:flame/game.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:layout/layout.dart';
@@ -14,18 +17,6 @@ class ArenaGrid extends ConsumerStatefulWidget {
 }
 
 class _ArenaGridState extends ConsumerState<ArenaGrid> {
-  // List<Widget> _generateGridBlocks() {
-  //   return List.generate(
-  //     ParsingHelper.arenaSize * ParsingHelper.arenaSize,
-  //     (i) {
-  //       // top left corner 0,0
-  //       // cell to the right 1,0
-  //       final index = i;
-  //       return GridBlockButton(index);
-  //     },
-  //   );
-  // }
-
   Widget? cellGrid(BuildContext context) {
     final game = GridGame(ref);
     final cmpRef = ComponentRef(ref);
@@ -37,7 +28,14 @@ class _ArenaGridState extends ConsumerState<ArenaGrid> {
         }
       },
       child: Listener(
-        onPointerDown: (event) => handleMouseDown(cmpRef),
+        onPointerDown: (event) {
+          if (event.kind == PointerDeviceKind.mouse &&
+              event.buttons == kSecondaryMouseButton) {
+            handleMouseDownAlt(cmpRef);
+          } else {
+            handleMouseDown(cmpRef);
+          }
+        },
         onPointerUp: (event) => handleMouseUp(cmpRef),
         onPointerMove: (event) {
           game.updateCursorPosition(event.localPosition);

@@ -285,8 +285,8 @@ class GridBlockComponent extends RectangleComponent
     final isHovered = cellState.isHovered;
 
     if (isHovered) {
-      if (hover == null || hover?.parent == null) {
-        hover ??= RectangleComponent(
+      if (hover == null) {
+        hover = RectangleComponent(
           position: position + Vector2.all(cellSize() / 2),
           size: Vector2(width * 1.13, height * 1.13),
           anchor: Anchor.center,
@@ -294,6 +294,7 @@ class GridBlockComponent extends RectangleComponent
         );
         parent?.add(hover!);
       }
+      hover?.opacity = 1;
 
       if (ref.read(isClickPendingProvider)) {
         hover!.setColor(const Color.fromARGB(255, 196, 31, 20));
@@ -307,8 +308,8 @@ class GridBlockComponent extends RectangleComponent
         setColor(
           ColorHelper.heightToColor(thisBlock.height),
         );
-        if (hover!.parent != null) hover!.parent!.remove(hover!);
       }
+      hover?.opacity = 0;
       priority = 1;
     }
   }

@@ -1,8 +1,6 @@
 import 'package:cgef/components/button_number_field.dart';
-import 'package:cgef/helpers/layout_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:layout/layout.dart';
 
 class FatInput extends StatelessWidget {
   const FatInput({
@@ -27,7 +25,7 @@ class FatInput extends StatelessWidget {
       width: double.infinity,
       child: TextField(
         controller: controller,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 15.0,
           color: Colors.white,
         ),
@@ -43,8 +41,9 @@ class FatInput extends StatelessWidget {
                 if (num < -50) return newValue.copyWith(text: '-50');
               }
               return newValue;
-            } catch (e) {}
-            return oldValue;
+            } catch (e) {
+              return oldValue;
+            }
           }),
         ],
         onEditingComplete: () {

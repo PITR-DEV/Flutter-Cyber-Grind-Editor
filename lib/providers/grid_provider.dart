@@ -145,7 +145,7 @@ void toolChanged(ComponentRef ref) {
   ref.read(selectedGridBlockProvider.notifier).state = null;
 }
 
-void onClickBlock(ComponentRef ref, int index) {
+void onClickBlock(ComponentRef ref, int index, {bool alt = false}) {
   // When a block is clicked
   final toolSelected = ref.read(selectedGridBlockProvider);
   final x = index % ParsingHelper.arenaSize;
@@ -156,7 +156,7 @@ void onClickBlock(ComponentRef ref, int index) {
   switch (ref.read(toolProvider)) {
     case Tool.point:
     case Tool.brush:
-      affectBlock(ref, index, recordToHistory: true);
+      affectBlock(ref, index, recordToHistory: true, alt: alt);
       break;
     case Tool.fillRect:
       if (toolSelected == null) {
@@ -215,7 +215,8 @@ void onClickBlock(ComponentRef ref, int index) {
   }
 }
 
-Delta affectBlock(ComponentRef ref, int index, {bool recordToHistory = false}) {
+Delta affectBlock(ComponentRef ref, int index,
+    {bool recordToHistory = false, bool alt = false}) {
   final activeTab = ref.read(tabProvider);
   final x = index ~/ ParsingHelper.arenaSize;
   final y = index % ParsingHelper.arenaSize;
@@ -224,9 +225,11 @@ Delta affectBlock(ComponentRef ref, int index, {bool recordToHistory = false}) {
 
   if (activeTab == AppTab.prefabs) {
     gridElement.state = gridElement.state.copyWith(
-      prefab: getPrefabSymbol(
-        ref.read(selectedPrefabProvider),
-      ),
+      prefab: alt
+          ? getPrefabSymbol(Prefab.none)
+          : getPrefabSymbol(
+              ref.read(selectedPrefabProvider),
+            ),
     );
 
     final delta =
@@ -241,23 +244,26 @@ Delta affectBlock(ComponentRef ref, int index, {bool recordToHistory = false}) {
     return delta;
   }
 
+  var altMod = 1;
+  if (alt) altMod = -1;
+
   switch (ref.read(toolModifierProvider)) {
     case ToolModifier.plusOne:
-      gridElement.state = gridElement.state
-          .copyWith(height: gridHeightLimiter(gridElement.state.height + 1));
+      gridElement.state = gridElement.state.copyWith(
+          height: gridHeightLimiter(gridElement.state.height + 1 * altMod));
       break;
     case ToolModifier.minusOne:
-      gridElement.state = gridElement.state
-          .copyWith(height: gridHeightLimiter(gridElement.state.height - 1));
+      gridElement.state = gridElement.state.copyWith(
+          height: gridHeightLimiter(gridElement.state.height - 1 * altMod));
       break;
     case ToolModifier.setTo:
-      gridElement.state = gridElement.state
-          .copyWith(height: gridHeightLimiter(ref.read(setToValueProvider)));
+      gridElement.state = gridElement.state.copyWith(
+          height: gridHeightLimiter(alt ? 0 : ref.read(setToValueProvider)));
       break;
     case ToolModifier.plusValue:
       gridElement.state = gridElement.state.copyWith(
           height: gridHeightLimiter(
-              gridElement.state.height + ref.read(plusValueProvider)));
+              gridElement.state.height + ref.read(plusValueProvider) * altMod));
       break;
   }
 
@@ -339,6 +345,16 @@ void handleMouseDown(ComponentRef ref) {
   if (currentTool == Tool.brush && !isPainting) {
     paintStart(ref);
   } else if (currentTool != Tool.brush) {
+    ref.read(altClickProvider.notifier).state = false;
+    ref.read(isClickPendingProvider.notifier).state = true;
+  }
+}
+
+void handleMouseDownAlt(ComponentRef ref) {
+  final currentTool = ref.read(toolProvider);
+
+  if (currentTool != Tool.brush) {
+    ref.read(altClickProvider.notifier).state = true;
     ref.read(isClickPendingProvider.notifier).state = true;
   }
 }
@@ -352,7 +368,7 @@ void handleMouseUp(ComponentRef ref) {
     paintStop(ref);
   } else if (currentTool != Tool.brush) {
     if (selectedBlock != null && ref.read(isClickPendingProvider)) {
-      onClickBlock(ref, selectedBlock);
+      onClickBlock(ref, selectedBlock, alt: ref.read(altClickProvider));
       ref.read(isClickPendingProvider.notifier).state = false;
     }
   }

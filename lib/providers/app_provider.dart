@@ -17,6 +17,7 @@ final currentCoordinateProvider = StateProvider<Vector2?>((ref) => null);
 final selectedGridBlockProvider = StateProvider<int?>((ref) => null);
 final hoveredCellIndexProvider = StateProvider<int?>((ref) => null);
 final isClickPendingProvider = StateProvider((ref) => false);
+final altClickProvider = StateProvider((ref) => false);
 
 final debugCellsUpdatedProvider = StateProvider((ref) => 0);
 final debugCellsUpdatedProvider2 = StateProvider((ref) => <int>[].lock);

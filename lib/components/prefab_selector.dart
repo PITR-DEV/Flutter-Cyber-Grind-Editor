@@ -11,7 +11,10 @@ import 'input/fat_button.dart';
 class PrefabSelector extends ConsumerWidget {
   const PrefabSelector({Key? key}) : super(key: key);
 
-  Widget prefabButton(Prefab prefab, List<Widget> children, WidgetRef ref) {
+  Widget prefabButton(Prefab prefab, List<Widget> children, WidgetRef ref,
+      BuildContext context) {
+    final compactLayout = context.breakpoint <= LayoutBreakpoint.sm;
+
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -28,7 +31,8 @@ class PrefabSelector extends ConsumerWidget {
             ColorHelper.prefabColors.containsKey(prefab))
           Positioned(
             top: prefab == Prefab.none ? 16 : 20,
-            left: -22,
+            left: !compactLayout ? -22 : null,
+            right: compactLayout ? 12 : null,
             child: Container(
               height: 14,
               width: 14,
@@ -60,84 +64,96 @@ class PrefabSelector extends ConsumerWidget {
             height: 12,
           ),
           prefabButton(
-              Prefab.none,
-              [
-                Container(
-                  width: 12 + 52,
-                ),
-                const Text('None')
-              ],
-              ref),
+            Prefab.none,
+            [
+              Container(
+                width: 12 + 52,
+              ),
+              const Text('None')
+            ],
+            ref,
+            context,
+          ),
           prefabButton(
-              Prefab.melee,
-              [
-                Image.asset(
-                  'assets/Filth.png',
-                  height: 52,
-                  width: 52,
-                ),
-                Container(
-                  width: 12,
-                ),
-                const Text('Melee')
-              ],
-              ref),
+            Prefab.melee,
+            [
+              Image.asset(
+                'assets/Filth.png',
+                height: 52,
+                width: 52,
+              ),
+              Container(
+                width: 12,
+              ),
+              const Text('Melee')
+            ],
+            ref,
+            context,
+          ),
           prefabButton(
-              Prefab.projectile,
-              [
-                Image.asset(
-                  'assets/Shotgun_Husk.png',
-                  height: 52,
-                  width: 52,
-                ),
-                Container(
-                  width: 12,
-                ),
-                const Text('Projectile')
-              ],
-              ref),
+            Prefab.projectile,
+            [
+              Image.asset(
+                'assets/Shotgun_Husk.png',
+                height: 52,
+                width: 52,
+              ),
+              Container(
+                width: 12,
+              ),
+              const Text('Projectile')
+            ],
+            ref,
+            context,
+          ),
           prefabButton(
-              Prefab.hideous,
-              [
-                Image.asset(
-                  'assets/Hideous_Mass.png',
-                  height: 52,
-                  width: 52,
-                ),
-                Container(
-                  width: 12,
-                ),
-                const Text('Hideous')
-              ],
-              ref),
+            Prefab.hideous,
+            [
+              Image.asset(
+                'assets/Hideous_Mass.png',
+                height: 52,
+                width: 52,
+              ),
+              Container(
+                width: 12,
+              ),
+              const Text('Hideous')
+            ],
+            ref,
+            context,
+          ),
           prefabButton(
-              Prefab.jumpPad,
-              [
-                Image.asset(
-                  'assets/Jump_Pad.png',
-                  height: 52,
-                  width: 52,
-                ),
-                Container(
-                  width: 12,
-                ),
-                const Text('Jump Pad')
-              ],
-              ref),
+            Prefab.jumpPad,
+            [
+              Image.asset(
+                'assets/Jump_Pad.png',
+                height: 52,
+                width: 52,
+              ),
+              Container(
+                width: 12,
+              ),
+              const Text('Jump Pad')
+            ],
+            ref,
+            context,
+          ),
           prefabButton(
-              Prefab.stairs,
-              [
-                Image.asset(
-                  'assets/Stairs.png',
-                  height: 52,
-                  width: 52,
-                ),
-                Container(
-                  width: 12,
-                ),
-                const Text('Stairs')
-              ],
-              ref),
+            Prefab.stairs,
+            [
+              Image.asset(
+                'assets/Stairs.png',
+                height: 52,
+                width: 52,
+              ),
+              Container(
+                width: 12,
+              ),
+              const Text('Stairs')
+            ],
+            ref,
+            context,
+          ),
         ],
       ),
     );

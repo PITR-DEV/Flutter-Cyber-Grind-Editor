@@ -98,6 +98,9 @@ class _ButtonNumberField extends ConsumerState<ButtonNumberField> {
                     customBorderRadius: const BorderRadius.only(),
                     onChanged: (p0) {
                       widget.onValueChanged?.call(int.tryParse(p0) ?? 0);
+                      setState(() {
+                        storedValue = int.tryParse(p0) ?? 0;
+                      });
                     },
                   ),
                 ),
