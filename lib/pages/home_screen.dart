@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:cgef/providers/app_provider.dart';
 import 'package:cgef/providers/grid_provider.dart';
 import 'package:cgef/components/input/fat_button.dart';
 import 'package:file_picker/file_picker.dart';
@@ -104,7 +103,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ),
                         ],
                       )
-                    : const Column(),
+                    : Column(
+                        children: [],
+                      ),
                 SizedBox(
                   width: 200,
                   child: FatButton(

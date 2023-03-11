@@ -30,11 +30,15 @@ class PrefabSelector extends ConsumerWidget {
             top: prefab == Prefab.none ? 16 : 20,
             left: -22,
             child: Container(
-              height: 12,
-              width: 12,
+              height: 14,
+              width: 14,
               decoration: BoxDecoration(
                 color: ColorHelper.prefabColors[prefab],
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Colors.black,
+                  width: 2,
+                ),
               ),
             ),
           ),

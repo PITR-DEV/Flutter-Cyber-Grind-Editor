@@ -1,7 +1,5 @@
 import 'package:cgef/flame/grid.dart';
-import 'package:cgef/helpers/parsing_helper.dart';
 import 'package:cgef/providers/grid_provider.dart';
-import 'package:cgef/components/input/grid_block_button.dart';
 import 'package:flame/game.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';

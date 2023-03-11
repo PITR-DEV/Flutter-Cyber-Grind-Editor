@@ -75,8 +75,8 @@ void loadFromString(WidgetRef ref, String source) {
   // Load a pattern from a string
   final grid = ParsingHelper().importString(source);
   for (int i = 0; i < ParsingHelper.arenaSize * ParsingHelper.arenaSize; i++) {
-    final y = i ~/ ParsingHelper.arenaSize;
-    final x = i % ParsingHelper.arenaSize;
+    final x = i ~/ ParsingHelper.arenaSize;
+    final y = i % ParsingHelper.arenaSize;
     ref.read(gridProvider(i).notifier).state = grid[x][y];
     ref.read(cellStates(i).notifier).state = const CellState(
       isHovered: false,

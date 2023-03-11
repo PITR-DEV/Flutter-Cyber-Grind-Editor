@@ -1,5 +1,4 @@
-import 'dart:ui';
-
+import 'package:flutter/material.dart';
 import 'package:bezier/bezier.dart';
 import 'package:cgef/models/enums.dart';
 import 'package:vector_math/vector_math.dart';
@@ -37,19 +36,7 @@ class ColorHelper {
   }
 
   static Color blockOverlayColor(int height) {
-    if (height >= 20) height = 20;
-    if (height <= -10) height = -10;
-
-    if (height > 5) {
-      height -= 6;
-    } else {
-      height += 3;
-    }
-
-    final brightness = evaluateHeight(height);
-    final colorBrightness = (brightness * 255).toInt();
-    return Color.fromARGB(
-        255, colorBrightness, colorBrightness, colorBrightness);
+    return blockTextColor(height);
   }
 
   static Color blockTextColor(int height, {bool hidden = false}) {
@@ -70,6 +57,6 @@ class ColorHelper {
     Prefab.melee: const Color.fromARGB(255, 135, 185, 88),
     Prefab.projectile: const Color.fromARGB(255, 238, 184, 103),
     Prefab.jumpPad: const Color.fromARGB(255, 114, 175, 255),
-    Prefab.hideous: const Color.fromARGB(255, 221, 85, 85),
+    Prefab.hideous: const Color.fromARGB(255, 236, 113, 113),
   };
 }

@@ -3,6 +3,7 @@ import 'package:cgef/helpers/parsing_helper.dart';
 import 'package:cgef/providers/app_provider.dart';
 import 'package:cgef/providers/grid_provider.dart';
 import 'package:flame/components.dart';
+import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
@@ -53,15 +54,10 @@ class GridGame extends FlameGame
   @override
   onLoad() async {
     await super.onLoad();
-    // create a components for all grid elements
-  }
-
-  @override
-  void onMount() {
-    super.onMount();
+    var stairsImage = await Flame.images.load('stairs_tiny.png');
     const total = ParsingHelper.arenaSize * ParsingHelper.arenaSize;
     for (var i = 0; i < total; i++) {
-      final cell = GridBlockComponent(i);
+      final cell = GridBlockComponent(i, stairsImage: Sprite(stairsImage));
       add(cell);
       gridBlocks.add(cell);
     }

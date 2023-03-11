@@ -42,10 +42,10 @@ class Toolbox extends ConsumerWidget {
                 toolChanged(ComponentRef(ref));
               },
               active: ref.watch(toolProvider) == Tool.point,
-              child: const Row(
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+                children: const [
                   Icon(Icons.create_outlined),
                   SizedBox(
                     width: 8,
@@ -70,10 +70,10 @@ class Toolbox extends ConsumerWidget {
                       toolChanged(ComponentRef(ref));
                     },
                     active: ref.watch(toolProvider) == Tool.brush,
-                    child: const Row(
+                    child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
+                      children: const [
                         Icon(Icons.brush_outlined),
                         SizedBox(
                           width: 8,
