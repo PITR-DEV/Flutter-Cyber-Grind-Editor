@@ -49,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _openSourceCode() async {
-    const sourceUrl = 'https://gitlab.com/PITR_DEV/flutter-cyber-grind-editor';
+    const sourceUrl = 'https://github.com/PITR-DEV/Flutter-Cyber-Grind-Editor';
     await launchUrlString(sourceUrl, mode: LaunchMode.externalApplication);
   }
 
